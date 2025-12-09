@@ -64,7 +64,7 @@ const Products = ({ selectedProduct, onSelectProduct }: ProductsProps) => {
               <div className="mb-6 rounded-xl overflow-hidden">
                 <img 
                   src={product} 
-                  alt={`Za'atarati Lebanese mix ${prod.weight} pack`}
+                  alt={`Za'atarati ${prod.weight} pack`}
                   className="w-full h-64 object-cover"
                 />
               </div>
