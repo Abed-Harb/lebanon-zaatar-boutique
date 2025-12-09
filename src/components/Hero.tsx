@@ -27,7 +27,7 @@ const Hero = () => {
           <div className="mb-8 animate-scale-in">
             <img 
               src={logo} 
-              alt="Za'atarati Lebanese mix logo with cedar tree" 
+              alt="Za'atarati logo with cedar tree" 
               className="w-40 h-40 md:w-56 md:h-56 mx-auto rounded-full shadow-card"
             />
           </div>
