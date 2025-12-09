@@ -1,9 +1,10 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Mail, Instagram, Facebook } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import logo from '@/assets/logo.jpeg';
 
 const Footer = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -62,8 +63,22 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="mt-8 pt-8 border-t border-primary-foreground/20 text-center">
+        {/* Legal Links & Copyright */}
+        <div className="mt-8 pt-8 border-t border-primary-foreground/20 text-center space-y-4">
+          <div className="flex items-center justify-center gap-6">
+            <Link 
+              to="/impressum" 
+              className="font-body text-sm opacity-70 hover:opacity-100 transition-opacity"
+            >
+              Impressum
+            </Link>
+            <Link 
+              to="/datenschutz" 
+              className="font-body text-sm opacity-70 hover:opacity-100 transition-opacity"
+            >
+              {language === 'de' ? 'Datenschutz' : 'Privacy Policy'}
+            </Link>
+          </div>
           <p className="font-body text-sm opacity-60">
             © {currentYear} Za'atarati. {t.footer.rights}.
           </p>
