@@ -22,9 +22,6 @@ const Footer = () => {
                 Za'atarati
               </span>
             </div>
-            <p className="font-body text-sm opacity-80">
-              Lebanese Mix
-            </p>
           </div>
 
           {/* Contact */}
