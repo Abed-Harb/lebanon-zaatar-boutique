@@ -62,34 +62,6 @@ serve(async (req) => {
 
     console.log("Checkout session created", { sessionId: session.id, url: session.url });
 
-    // Send WhatsApp notification for new order
-    try {
-      const supabaseUrl = Deno.env.get("SUPABASE_URL");
-      const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
-      
-      const productName = productId === "100g" ? "Za'atar 100g" : "Za'atar 200g";
-      
-      await fetch(`${supabaseUrl}/functions/v1/send-whatsapp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${supabaseKey}`,
-        },
-        body: JSON.stringify({
-          orderDetails: {
-            productName,
-            quantity,
-            customerName: customerInfo?.name || "Unknown",
-            customerEmail: customerInfo?.email || "Unknown",
-          },
-        }),
-      });
-      console.log("WhatsApp notification sent");
-    } catch (whatsappError) {
-      console.error("Failed to send WhatsApp notification:", whatsappError);
-      // Don't fail the checkout if WhatsApp fails
-    }
-
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
