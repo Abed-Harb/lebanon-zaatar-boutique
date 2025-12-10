@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
-import { AlertTriangle, Minus, Plus } from 'lucide-react';
+import { AlertTriangle, Minus, Plus, Loader2 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface OrderFormProps {
   selectedProduct: string | null;
@@ -51,29 +52,46 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
       return;
     }
 
+    if (!formData.email) {
+      toast({
+        title: "Error",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     
-    // Simulate order submission
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: "✓",
-      description: t.order.success,
-    });
-    
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      street: '',
-      zip: '',
-      city: '',
-      country: 'Deutschland',
-    });
-    setQuantity(1);
-    onProductChange('');
-    setIsSubmitting(false);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-checkout', {
+        body: {
+          productId: selectedProduct,
+          quantity: quantity,
+          customerInfo: {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Checkout error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start checkout. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -275,9 +293,16 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
                 <button
                   type="submit"
                   disabled={isSubmitting || !selectedProduct}
-                  className="w-full py-4 bg-primary text-primary-foreground rounded-full font-body font-medium text-lg hover:bg-olive-dark transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-4 bg-primary text-primary-foreground rounded-full font-body font-medium text-lg hover:bg-olive-dark transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? '...' : t.order.submit}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      ...
+                    </>
+                  ) : (
+                    t.order.checkout
+                  )}
                 </button>
 
                 {/* No Return Notice */}

@@ -62,6 +62,12 @@ export const translations = {
       submit: 'Bestellung absenden',
       noReturn: 'Hinweis: Lebensmittel können aus hygienischen Gründen nicht zurückgegeben werden.',
       success: 'Vielen Dank für Ihre Bestellung! Wir werden uns in Kürze bei Ihnen melden.',
+      checkout: 'Zur Kasse',
+    },
+    orderSuccess: {
+      title: 'Bestellung erfolgreich!',
+      message: 'Vielen Dank für Ihre Bestellung. Sie erhalten in Kürze eine Bestätigungs-E-Mail.',
+      backHome: 'Zurück zur Startseite',
     },
     footer: {
       rights: 'Alle Rechte vorbehalten',
@@ -130,6 +136,12 @@ export const translations = {
       submit: 'Submit Order',
       noReturn: 'Note: Food products cannot be returned for hygiene reasons.',
       success: 'Thank you for your order! We will contact you shortly.',
+      checkout: 'Checkout',
+    },
+    orderSuccess: {
+      title: 'Order Successful!',
+      message: 'Thank you for your order. You will receive a confirmation email shortly.',
+      backHome: 'Back to Home',
     },
     footer: {
       rights: 'All rights reserved',
