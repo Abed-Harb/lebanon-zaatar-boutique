@@ -6,11 +6,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Price IDs for products
+// Price IDs for products (TEST MODE)
 const PRICES = {
-  "100g": "price_1ScwCGJZaJZQqwlb2OPUO0pP",
-  "200g": "price_1ScwCiJZaJZQqwlb4x9eNC1o",
-  "delivery": "price_1ScwD6JZaJZQqwlbMQB1kSn1",
+  "100g": "price_1ScxALABEFDT4Lm9mbXE2R2j",
+  "200g": "price_1ScxAbABEFDT4Lm9ALqnoSTY",
+  "delivery": "price_1ScxAuABEFDT4Lm9mrtX5zCo",
 };
 
 serve(async (req) => {
