@@ -36,7 +36,7 @@ serve(async (req) => {
 
     // Create checkout session with product and delivery
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'paypal', 'klarna'],
+      // Let Stripe show all payment methods enabled in your dashboard
       line_items: [
         {
           price: priceId,
