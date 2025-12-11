@@ -28,7 +28,7 @@ const Hero = () => {
             <img 
               src={logo} 
               alt="Za'atarati logo with cedar tree" 
-              className="w-40 h-40 md:w-56 md:h-56 mx-auto rounded-full shadow-card"
+              className="w-40 h-40 md:w-56 md:h-56 mx-auto rounded-full"
             />
           </div>
 
