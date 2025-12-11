@@ -1,6 +1,6 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ChevronDown } from 'lucide-react';
-import logo from '@/assets/logo.jpeg';
+import logo from '@/assets/logo-transparent.png';
 
 const Hero = () => {
   const { t } = useLanguage();
