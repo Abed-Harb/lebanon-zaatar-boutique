@@ -3,5 +3,5 @@ project_id = "cuyrtuzgkdpvyvkdwadn"
 [functions.create-checkout]
 verify_jwt = false
 
-[functions.send-whatsapp]
+[functions.send-order-email]
 verify_jwt = false
