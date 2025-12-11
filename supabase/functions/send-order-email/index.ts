@@ -15,6 +15,10 @@ interface OrderEmailRequest {
     quantity: number;
     customerName: string;
     customerEmail: string;
+    customerPhone?: string;
+    shippingAddress?: string;
+    paymentStatus?: string;
+    sessionId?: string;
   };
 }
 
@@ -35,7 +39,7 @@ serve(async (req: Request) => {
       subject: "🛒 New Order Received!",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #8B7355; border-bottom: 2px solid #8B7355; padding-bottom: 10px;">New Order Received!</h1>
+          <h1 style="color: #8B7355; border-bottom: 2px solid #8B7355; padding-bottom: 10px;">🎉 New Order - ${orderDetails.paymentStatus || "Received"}</h1>
           
           <div style="background-color: #f9f5f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h2 style="color: #333; margin-top: 0;">Order Details</h2>
@@ -56,9 +60,18 @@ serve(async (req: Request) => {
                 <td style="padding: 8px 0; color: #666;"><strong>Email:</strong></td>
                 <td style="padding: 8px 0;">${orderDetails.customerEmail}</td>
               </tr>
+              ${orderDetails.customerPhone ? `<tr>
+                <td style="padding: 8px 0; color: #666;"><strong>Phone:</strong></td>
+                <td style="padding: 8px 0;">${orderDetails.customerPhone}</td>
+              </tr>` : ""}
+              ${orderDetails.shippingAddress ? `<tr>
+                <td style="padding: 8px 0; color: #666;"><strong>Shipping:</strong></td>
+                <td style="padding: 8px 0;">${orderDetails.shippingAddress}</td>
+              </tr>` : ""}
             </table>
           </div>
           
+          ${orderDetails.sessionId ? `<p style="color: #999; font-size: 12px;">Order ID: ${orderDetails.sessionId}</p>` : ""}
           <p style="color: #666; font-size: 14px;">This is an automated notification from your Za'atar store.</p>
         </div>
       `,
