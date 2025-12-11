@@ -52,7 +52,7 @@ serve(async (req) => {
       cancel_url: `${req.headers.get("origin")}/#order`,
       customer_email: customerInfo?.email,
       shipping_address_collection: {
-        allowed_countries: ["DE", "AT", "CH"],
+        allowed_countries: ["DE"],
       },
       metadata: {
         customer_name: customerInfo?.name || "",
