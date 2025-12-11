@@ -61,38 +61,7 @@ serve(async (req) => {
     });
 
     console.log("Checkout session created", { sessionId: session.id, url: session.url });
-
-    // Send email notification for new order
-    try {
-      const supabaseUrl = Deno.env.get("SUPABASE_URL");
-      const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
-      const notificationEmail = Deno.env.get("NOTIFICATION_EMAIL") || customerInfo?.email;
-      
-      const productName = productId === "100g" ? "Za'atar 100g" : "Za'atar 200g";
-      
-      if (notificationEmail) {
-        await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${supabaseKey}`,
-          },
-          body: JSON.stringify({
-            recipientEmail: notificationEmail,
-            orderDetails: {
-              productName,
-              quantity,
-              customerName: customerInfo?.name || "Unknown",
-              customerEmail: customerInfo?.email || "Unknown",
-            },
-          }),
-        });
-        console.log("Email notification sent to:", notificationEmail);
-      }
-    } catch (emailError) {
-      console.error("Failed to send email notification:", emailError);
-      // Don't fail the checkout if email fails
-    }
+    // Email notification is now handled by stripe-webhook after payment confirmation
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
