@@ -6,6 +6,9 @@ import About from '@/components/About';
 import Mankousheh from '@/components/Mankousheh';
 import Products from '@/components/Products';
 import OrderForm from '@/components/OrderForm';
+import FAQ from '@/components/FAQ';
+import Contact from '@/components/Contact';
+import Newsletter from '@/components/Newsletter';
 import Footer from '@/components/Footer';
 
 const Index = () => {
@@ -27,6 +30,9 @@ const Index = () => {
             selectedProduct={selectedProduct} 
             onProductChange={setSelectedProduct}
           />
+          <FAQ />
+          <Contact />
+          <Newsletter />
         </main>
         <Footer />
       </div>
