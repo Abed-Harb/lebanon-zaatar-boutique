@@ -112,7 +112,7 @@ serve(async (req: Request) => {
     `;
 
     const { data, error } = await resend.emails.send({
-      from: "Zaatarati <onboarding@resend.dev>",
+      from: "Zaatarati <bestellung@zaatarati.de>",
       to: [recipientEmail],
       subject,
       html,
