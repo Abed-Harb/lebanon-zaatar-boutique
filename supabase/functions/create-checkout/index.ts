@@ -13,15 +13,17 @@ const PRICES = {
   "delivery": "price_1ScxAuABEFDT4Lm9mrtX5zCo",
 };
 
+const FREE_SHIPPING_THRESHOLD = 20; // Free shipping for orders €20+
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { productId, quantity, customerInfo } = await req.json();
+    const { productId, quantity, subtotal, customerInfo } = await req.json();
     
-    console.log("Creating checkout session", { productId, quantity, customerInfo });
+    console.log("Creating checkout session", { productId, quantity, subtotal, customerInfo });
 
     if (!productId || !PRICES[productId as keyof typeof PRICES]) {
       throw new Error("Invalid product selected");
@@ -33,20 +35,32 @@ serve(async (req) => {
 
     const priceId = PRICES[productId as keyof typeof PRICES];
     const deliveryPriceId = PRICES.delivery;
+    
+    // Check if order qualifies for free shipping
+    const orderSubtotal = subtotal || 0;
+    const isFreeShipping = orderSubtotal >= FREE_SHIPPING_THRESHOLD;
+    
+    console.log("Shipping calculation", { orderSubtotal, isFreeShipping, threshold: FREE_SHIPPING_THRESHOLD });
 
-    // Create checkout session with product and delivery
+    // Build line items - only add delivery if not free shipping
+    const lineItems = [
+      {
+        price: priceId,
+        quantity: quantity,
+      },
+    ];
+    
+    if (!isFreeShipping) {
+      lineItems.push({
+        price: deliveryPriceId,
+        quantity: 1,
+      });
+    }
+
+    // Create checkout session with product and conditional delivery
     const session = await stripe.checkout.sessions.create({
       // Let Stripe show all payment methods enabled in your dashboard
-      line_items: [
-        {
-          price: priceId,
-          quantity: quantity,
-        },
-        {
-          price: deliveryPriceId,
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       mode: "payment",
       success_url: `${req.headers.get("origin")}/order-success`,
       cancel_url: `${req.headers.get("origin")}/#order`,

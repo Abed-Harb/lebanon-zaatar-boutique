@@ -98,10 +98,10 @@ const Products = ({ selectedProduct, onSelectProduct }: ProductsProps) => {
 
         {/* Delivery Info */}
         <div className="mt-12 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-background rounded-full shadow-soft">
+          <div className="inline-flex items-center gap-2 px-6 py-3 bg-primary/10 rounded-full shadow-soft border border-primary/20">
             <Truck className="w-5 h-5 text-primary" />
             <span className="font-body text-foreground">
-              {t.products.delivery}: <span className="font-semibold">€1,99</span>
+              {t.products.freeShippingOver}
             </span>
           </div>
         </div>
