@@ -5,11 +5,16 @@ import Hero from '@/components/Hero';
 import About from '@/components/About';
 import Mankousheh from '@/components/Mankousheh';
 import Products from '@/components/Products';
+import TrustBadges from '@/components/TrustBadges';
 import OrderForm from '@/components/OrderForm';
+import Testimonials from '@/components/Testimonials';
+import Recipes from '@/components/Recipes';
 import FAQ from '@/components/FAQ';
 import Contact from '@/components/Contact';
 import Newsletter from '@/components/Newsletter';
 import Footer from '@/components/Footer';
+import WhatsAppButton from '@/components/WhatsAppButton';
+import CookieBanner from '@/components/CookieBanner';
 
 const Index = () => {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
@@ -26,15 +31,20 @@ const Index = () => {
             selectedProduct={selectedProduct} 
             onSelectProduct={setSelectedProduct} 
           />
+          <TrustBadges />
           <OrderForm 
             selectedProduct={selectedProduct} 
             onProductChange={setSelectedProduct}
           />
+          <Testimonials />
+          <Recipes />
           <FAQ />
           <Contact />
           <Newsletter />
         </main>
         <Footer />
+        <WhatsAppButton />
+        <CookieBanner />
       </div>
     </LanguageProvider>
   );
