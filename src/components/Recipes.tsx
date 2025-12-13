@@ -1,5 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import mankousheh from '@/assets/mankousheh.jpg';
+import zaatarSalad from '@/assets/zaatar-salad.jpg';
+import zaatarDip from '@/assets/zaatar-dip.jpg';
 
 const Recipes = () => {
   const { t } = useLanguage();
@@ -15,13 +17,13 @@ const Recipes = () => {
       id: 'salad',
       title: t.recipes.recipe2Title,
       description: t.recipes.recipe2Desc,
-      image: null, // Will use placeholder
+      image: zaatarSalad,
     },
     {
       id: 'dip',
       title: t.recipes.recipe3Title,
       description: t.recipes.recipe3Desc,
-      image: null, // Will use placeholder
+      image: zaatarDip,
     },
   ];
 
@@ -45,17 +47,11 @@ const Recipes = () => {
             >
               {/* Image */}
               <div className="aspect-[4/3] overflow-hidden">
-                {recipe.image ? (
-                  <img
-                    src={recipe.image}
-                    alt={recipe.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-primary/10 flex items-center justify-center">
-                    <span className="text-6xl">🌿</span>
-                  </div>
-                )}
+                <img
+                  src={recipe.image}
+                  alt={recipe.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
               </div>
 
               {/* Content */}
