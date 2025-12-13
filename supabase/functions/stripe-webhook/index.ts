@@ -52,37 +52,65 @@ serve(async (req) => {
       const supabaseKey = Deno.env.get("SUPABASE_ANON_KEY");
       const notificationEmail = Deno.env.get("NOTIFICATION_EMAIL");
 
-      if (notificationEmail && supabaseUrl && supabaseKey) {
-        const emailResponse = await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${supabaseKey}`,
-          },
-          body: JSON.stringify({
-            recipientEmail: notificationEmail,
-            orderDetails: {
-              productName,
-              quantity,
-              customerName,
-              customerEmail,
-              customerPhone,
-              shippingAddress: shippingAddress ? 
-                `${shippingAddress.line1}, ${shippingAddress.city}, ${shippingAddress.postal_code}, ${shippingAddress.country}` : 
-                "Not provided",
-              paymentStatus: "PAID ✓",
-              sessionId: session.id,
-            },
-          }),
-        });
+      if (supabaseUrl && supabaseKey) {
+        const orderData = {
+          productName,
+          quantity,
+          customerName,
+          customerEmail,
+          customerPhone,
+          shippingAddress: shippingAddress ? 
+            `${shippingAddress.line1}, ${shippingAddress.city}, ${shippingAddress.postal_code}, ${shippingAddress.country}` : 
+            "Not provided",
+          paymentStatus: "PAID ✓",
+          sessionId: session.id,
+        };
 
-        if (emailResponse.ok) {
-          console.log("Order notification email sent successfully to:", notificationEmail);
-        } else {
-          console.error("Failed to send email:", await emailResponse.text());
+        // Send email to store owner
+        if (notificationEmail) {
+          const ownerEmailResponse = await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseKey}`,
+            },
+            body: JSON.stringify({
+              recipientEmail: notificationEmail,
+              emailType: "owner",
+              orderDetails: orderData,
+            }),
+          });
+
+          if (ownerEmailResponse.ok) {
+            console.log("Order notification email sent to owner:", notificationEmail);
+          } else {
+            console.error("Failed to send owner email:", await ownerEmailResponse.text());
+          }
+        }
+
+        // Send confirmation email to customer
+        if (customerEmail && customerEmail !== "Unknown") {
+          const customerEmailResponse = await fetch(`${supabaseUrl}/functions/v1/send-order-email`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${supabaseKey}`,
+            },
+            body: JSON.stringify({
+              recipientEmail: customerEmail,
+              emailType: "customer",
+              orderDetails: orderData,
+            }),
+          });
+
+          if (customerEmailResponse.ok) {
+            console.log("Order confirmation email sent to customer:", customerEmail);
+          } else {
+            console.error("Failed to send customer email:", await customerEmailResponse.text());
+          }
         }
       } else {
-        console.warn("Missing notification email or Supabase credentials");
+        console.warn("Missing Supabase credentials");
       }
     }
 

@@ -10,6 +10,7 @@ const corsHeaders = {
 
 interface OrderEmailRequest {
   recipientEmail: string;
+  emailType?: "owner" | "customer";
   orderDetails: {
     productName: string;
     quantity: number;
@@ -28,53 +29,93 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { recipientEmail, orderDetails }: OrderEmailRequest = await req.json();
+    const { recipientEmail, emailType = "owner", orderDetails }: OrderEmailRequest = await req.json();
     
-    console.log("Sending order confirmation email to:", recipientEmail);
+    console.log(`Sending ${emailType} email to:`, recipientEmail);
     console.log("Order details:", orderDetails);
 
-    const { data, error } = await resend.emails.send({
-      from: "Za'atar Orders <onboarding@resend.dev>",
-      to: [recipientEmail],
-      subject: "🛒 New Order Received!",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h1 style="color: #8B7355; border-bottom: 2px solid #8B7355; padding-bottom: 10px;">🎉 New Order - ${orderDetails.paymentStatus || "Received"}</h1>
-          
-          <div style="background-color: #f9f5f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h2 style="color: #333; margin-top: 0;">Order Details</h2>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 8px 0; color: #666;"><strong>Product:</strong></td>
-                <td style="padding: 8px 0;">${orderDetails.productName}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #666;"><strong>Quantity:</strong></td>
-                <td style="padding: 8px 0;">${orderDetails.quantity}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #666;"><strong>Customer:</strong></td>
-                <td style="padding: 8px 0;">${orderDetails.customerName}</td>
-              </tr>
-              <tr>
-                <td style="padding: 8px 0; color: #666;"><strong>Email:</strong></td>
-                <td style="padding: 8px 0;">${orderDetails.customerEmail}</td>
-              </tr>
-              ${orderDetails.customerPhone ? `<tr>
-                <td style="padding: 8px 0; color: #666;"><strong>Phone:</strong></td>
-                <td style="padding: 8px 0;">${orderDetails.customerPhone}</td>
-              </tr>` : ""}
-              ${orderDetails.shippingAddress ? `<tr>
-                <td style="padding: 8px 0; color: #666;"><strong>Shipping:</strong></td>
-                <td style="padding: 8px 0;">${orderDetails.shippingAddress}</td>
-              </tr>` : ""}
-            </table>
-          </div>
-          
-          ${orderDetails.sessionId ? `<p style="color: #999; font-size: 12px;">Order ID: ${orderDetails.sessionId}</p>` : ""}
-          <p style="color: #666; font-size: 14px;">This is an automated notification from your Za'atar store.</p>
+    const isCustomer = emailType === "customer";
+    
+    const subject = isCustomer 
+      ? "🎉 Vielen Dank für Ihre Bestellung bei Zaatarati!" 
+      : "🛒 New Order Received!";
+
+    const html = isCustomer ? `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #8B7355; border-bottom: 2px solid #8B7355; padding-bottom: 10px;">🎉 Vielen Dank für Ihre Bestellung!</h1>
+        
+        <p style="color: #333; font-size: 16px;">Liebe/r ${orderDetails.customerName},</p>
+        <p style="color: #333; font-size: 16px;">Vielen Dank für Ihre Bestellung bei Zaatarati! Wir haben Ihre Bestellung erhalten und bereiten sie für den Versand vor.</p>
+        
+        <div style="background-color: #f9f5f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h2 style="color: #333; margin-top: 0;">Ihre Bestellübersicht</h2>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; color: #666;"><strong>Produkt:</strong></td>
+              <td style="padding: 8px 0;">${orderDetails.productName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #666;"><strong>Menge:</strong></td>
+              <td style="padding: 8px 0;">${orderDetails.quantity}</td>
+            </tr>
+            ${orderDetails.shippingAddress ? `<tr>
+              <td style="padding: 8px 0; color: #666;"><strong>Lieferadresse:</strong></td>
+              <td style="padding: 8px 0;">${orderDetails.shippingAddress}</td>
+            </tr>` : ""}
+          </table>
         </div>
-      `,
+        
+        <p style="color: #333; font-size: 16px;">Wir werden Sie benachrichtigen, sobald Ihre Bestellung versandt wurde.</p>
+        <p style="color: #333; font-size: 16px;">Bei Fragen können Sie uns jederzeit kontaktieren.</p>
+        
+        <p style="color: #333; font-size: 16px; margin-top: 30px;">Herzliche Grüße,<br><strong>Das Zaatarati Team</strong></p>
+        
+        ${orderDetails.sessionId ? `<p style="color: #999; font-size: 12px; margin-top: 30px;">Bestellnummer: ${orderDetails.sessionId}</p>` : ""}
+      </div>
+    ` : `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h1 style="color: #8B7355; border-bottom: 2px solid #8B7355; padding-bottom: 10px;">🎉 New Order - ${orderDetails.paymentStatus || "Received"}</h1>
+        
+        <div style="background-color: #f9f5f0; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h2 style="color: #333; margin-top: 0;">Order Details</h2>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; color: #666;"><strong>Product:</strong></td>
+              <td style="padding: 8px 0;">${orderDetails.productName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #666;"><strong>Quantity:</strong></td>
+              <td style="padding: 8px 0;">${orderDetails.quantity}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #666;"><strong>Customer:</strong></td>
+              <td style="padding: 8px 0;">${orderDetails.customerName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #666;"><strong>Email:</strong></td>
+              <td style="padding: 8px 0;">${orderDetails.customerEmail}</td>
+            </tr>
+            ${orderDetails.customerPhone ? `<tr>
+              <td style="padding: 8px 0; color: #666;"><strong>Phone:</strong></td>
+              <td style="padding: 8px 0;">${orderDetails.customerPhone}</td>
+            </tr>` : ""}
+            ${orderDetails.shippingAddress ? `<tr>
+              <td style="padding: 8px 0; color: #666;"><strong>Shipping:</strong></td>
+              <td style="padding: 8px 0;">${orderDetails.shippingAddress}</td>
+            </tr>` : ""}
+          </table>
+        </div>
+        
+        ${orderDetails.sessionId ? `<p style="color: #999; font-size: 12px;">Order ID: ${orderDetails.sessionId}</p>` : ""}
+        <p style="color: #666; font-size: 14px;">This is an automated notification from your Za'atar store.</p>
+      </div>
+    `;
+
+    const { data, error } = await resend.emails.send({
+      from: "Zaatarati <onboarding@resend.dev>",
+      to: [recipientEmail],
+      subject,
+      html,
     });
 
     if (error) {
