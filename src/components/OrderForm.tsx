@@ -19,6 +19,7 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
     email: '',
     phone: '',
     street: '',
+    houseNumber: '',
     zip: '',
     city: '',
     country: 'Deutschland',
@@ -116,7 +117,8 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
   const selectStreetSuggestion = (suggestion: typeof streetSuggestions[0]) => {
     setFormData(prev => ({
       ...prev,
-      street: `${suggestion.street} ${suggestion.housenumber}`.trim(),
+      street: suggestion.street,
+      houseNumber: suggestion.housenumber || prev.houseNumber,
       zip: suggestion.postcode || prev.zip,
       city: suggestion.city || prev.city,
     }));
@@ -141,7 +143,7 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
       return;
     }
 
-    if (!formData.email || !formData.firstName || !formData.lastName || !formData.phone || !formData.street || !formData.zip || !formData.city) {
+    if (!formData.email || !formData.firstName || !formData.lastName || !formData.phone || !formData.street || !formData.houseNumber || !formData.zip || !formData.city) {
       toast({
         title: "Error",
         description: "Bitte füllen Sie alle Pflichtfelder aus",
@@ -167,7 +169,7 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
             email: formData.email,
             phone: formData.phone,
             address: {
-              line1: formData.street,
+              line1: `${formData.street} ${formData.houseNumber}`.trim(),
               postal_code: formData.zip,
               city: formData.city,
               country: 'DE',
@@ -277,43 +279,59 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
                 </div>
               </div>
 
-              {/* Street with autocomplete */}
-              <div className="relative">
-                <label className="block font-body text-sm font-medium text-foreground mb-2">
-                  {t.order.street} *
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    name="street"
-                    value={formData.street}
-                    onChange={handleInputChange}
-                    onFocus={() => streetSuggestions.length > 0 && setShowStreetSuggestions(true)}
-                    onBlur={() => setTimeout(() => setShowStreetSuggestions(false), 200)}
-                    placeholder={t.order.streetPlaceholder}
-                    required
-                    autoComplete="off"
-                    className="w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                  />
-                  {isLoadingStreet && (
-                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+              {/* Street & House Number */}
+              <div className="grid md:grid-cols-4 gap-4">
+                <div className="md:col-span-3 relative">
+                  <label className="block font-body text-sm font-medium text-foreground mb-2">
+                    Straße *
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      name="street"
+                      value={formData.street}
+                      onChange={handleInputChange}
+                      onFocus={() => streetSuggestions.length > 0 && setShowStreetSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowStreetSuggestions(false), 200)}
+                      placeholder="Musterstraße"
+                      required
+                      autoComplete="off"
+                      className="w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    />
+                    {isLoadingStreet && (
+                      <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+                    )}
+                  </div>
+                  {/* Street suggestions dropdown */}
+                  {showStreetSuggestions && streetSuggestions.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {streetSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => selectStreetSuggestion(suggestion)}
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-secondary transition-colors border-b border-border last:border-b-0"
+                        >
+                          {suggestion.display}
+                        </button>
+                      ))}
+                    </div>
                   )}
                 </div>
-                {/* Street suggestions dropdown */}
-                {showStreetSuggestions && streetSuggestions.length > 0 && (
-                  <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                    {streetSuggestions.map((suggestion, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        onClick={() => selectStreetSuggestion(suggestion)}
-                        className="w-full px-4 py-2 text-left text-sm hover:bg-secondary transition-colors border-b border-border last:border-b-0"
-                      >
-                        {suggestion.display}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <div>
+                  <label className="block font-body text-sm font-medium text-foreground mb-2">
+                    Hausnr. *
+                  </label>
+                  <input
+                    type="text"
+                    name="houseNumber"
+                    value={formData.houseNumber}
+                    onChange={handleInputChange}
+                    placeholder="12a"
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  />
+                </div>
               </div>
 
               {/* ZIP & City */}
