@@ -1,7 +1,7 @@
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Mail, Instagram, Facebook } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import logo from '@/assets/logo.jpeg';
+import logo from '@/assets/logo-new.jpg';
 
 const Footer = () => {
   const { t, language } = useLanguage();
