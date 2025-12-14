@@ -54,12 +54,22 @@ serve(async (req: Request) => {
     const isCustomer = emailType === "customer";
     const orderNumber = generateOrderNumber(orderDetails.sessionId || Date.now().toString());
     
-    const subject = isCustomer 
-      ? `Bestellbestätigung #${orderNumber} - Za'atarati` 
-      : `Neue Bestellung #${orderNumber} - BEZAHLT`;
+    // For customer emails, we add forwarding instructions at the top
+    const forwardingHeader = isCustomer ? `
+      <div style="background-color: #fef3c7; border: 2px solid #f59e0b; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <p style="margin: 0; color: #92400e; font-weight: bold;">📧 BITTE AN KUNDE WEITERLEITEN:</p>
+        <p style="margin: 5px 0 0 0; color: #92400e; font-size: 18px;"><strong>${recipientEmail}</strong></p>
+      </div>
+    ` : '';
 
-    const html = isCustomer ? `
+    const subject = isCustomer 
+      ? `⏩ WEITERLEITEN AN: ${recipientEmail} - Bestellbestätigung #${orderNumber}` 
+      : `🆕 Neue Bestellung #${orderNumber} - BEZAHLT`;
+
+    const customerEmailContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
+        ${forwardingHeader}
+        
         <div style="text-align: center; margin-bottom: 30px;">
           <h1 style="color: #4a5d23; margin: 0;">Za'atarati</h1>
           <p style="color: #8B7355; margin: 5px 0;">Lebanese Mix</p>
@@ -87,7 +97,9 @@ serve(async (req: Request) => {
         
         <p style="color: #333; font-size: 16px;">Herzliche Grüße,<br><strong>Das Za'atarati Team</strong></p>
       </div>
-    ` : `
+    `;
+
+    const ownerEmailContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
         <div style="background-color: #22c55e; color: white; padding: 20px; border-radius: 8px; text-align: center; margin-bottom: 20px;">
           <h1 style="margin: 0;">NEUE BESTELLUNG - BEZAHLT!</h1>
@@ -102,13 +114,15 @@ serve(async (req: Request) => {
         
         <h2>Kundeninformationen</h2>
         <p><strong>Name:</strong> ${orderDetails.customerName}</p>
-        <p><strong>Email:</strong> ${orderDetails.customerEmail}</p>
+        <p><strong>Email:</strong> <a href="mailto:${orderDetails.customerEmail}">${orderDetails.customerEmail}</a></p>
         ${orderDetails.customerPhone ? `<p><strong>Telefon:</strong> ${orderDetails.customerPhone}</p>` : ""}
         ${orderDetails.shippingAddress ? `<p><strong>Lieferadresse:</strong> ${orderDetails.shippingAddress}</p>` : ""}
         
         <p style="color: #e65100; font-weight: bold;">Bitte bereiten Sie die Bestellung für den Versand vor.</p>
       </div>
     `;
+
+    const html = isCustomer ? customerEmailContent : ownerEmailContent;
 
     // With onboarding@resend.dev, we can only send to the verified account email
     // So we always send to zaataratilibanon@gmail.com
@@ -126,7 +140,7 @@ serve(async (req: Request) => {
       body: JSON.stringify({
         from: "Za'atarati <onboarding@resend.dev>",
         to: [verifiedEmail],
-        subject: isCustomer ? `[KOPIE FÜR KUNDE: ${recipientEmail}] ${subject}` : subject,
+        subject,
         html,
       }),
     });
