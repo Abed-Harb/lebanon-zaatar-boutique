@@ -114,15 +114,16 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Retrieve the checkout session (shipping_details is included by default, not expandable)
+    // Retrieve the checkout session with expanded data
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ['line_items'],
+      expand: ['line_items', 'customer_details', 'shipping_details'],
     });
     
-    console.log("Full session shipping_details:", JSON.stringify(session.shipping_details));
+    console.log("Session customer_details:", JSON.stringify(session.customer_details));
+    console.log("Session shipping_details:", JSON.stringify(session.shipping_details));
+    console.log("Session customer_email:", session.customer_email);
 
     console.log("Session status:", session.payment_status);
-    console.log("Session metadata:", session.metadata);
 
     if (session.payment_status !== "paid") {
       return new Response(JSON.stringify({ 
@@ -143,25 +144,23 @@ serve(async (req) => {
 
     const productName = productItem?.description || "Za'atar Produkt";
     const quantity = productItem?.quantity || 1;
-    const customerName = session.metadata?.customer_name || session.shipping_details?.name || "Kunde";
-    const customerEmail = session.customer_email || "";
-    const customerPhone = session.metadata?.customer_phone || "";
     
-    // Get shipping address - first try shipping_details, then fall back to metadata
+    // Get customer info from shipping_details or customer_details
+    const customerName = session.shipping_details?.name || session.customer_details?.name || "Kunde";
+    const customerEmail = session.customer_details?.email || session.customer_email || "";
+    const customerPhone = session.customer_details?.phone || session.shipping_details?.phone || "";
+    
+    // Get shipping address from shipping_details
     const stripeShipping = session.shipping_details?.address;
-    const metadataAddress = {
-      line1: session.metadata?.shipping_line1,
-      postal_code: session.metadata?.shipping_postal_code,
-      city: session.metadata?.shipping_city,
-      country: session.metadata?.shipping_country,
-    };
+    console.log("Stripe shipping address:", JSON.stringify(stripeShipping));
     
     let shippingAddressStr = "Nicht angegeben";
     if (stripeShipping?.line1) {
-      shippingAddressStr = `${stripeShipping.line1}, ${stripeShipping.postal_code} ${stripeShipping.city}, ${stripeShipping.country}`;
-    } else if (metadataAddress.line1) {
-      shippingAddressStr = `${metadataAddress.line1}, ${metadataAddress.postal_code} ${metadataAddress.city}, ${metadataAddress.country}`;
+      const line2 = stripeShipping.line2 ? `, ${stripeShipping.line2}` : "";
+      shippingAddressStr = `${stripeShipping.line1}${line2}, ${stripeShipping.postal_code} ${stripeShipping.city}, ${stripeShipping.country}`;
     }
+    
+    console.log("Final shipping address:", shippingAddressStr);
 
     const orderData = {
       productName,
