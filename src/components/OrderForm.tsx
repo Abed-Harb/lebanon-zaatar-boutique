@@ -26,6 +26,9 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
   const [quantity, setQuantity] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingCity, setIsLoadingCity] = useState(false);
+  const [streetSuggestions, setStreetSuggestions] = useState<Array<{display: string, street: string, housenumber: string, postcode: string, city: string}>>([]);
+  const [isLoadingStreet, setIsLoadingStreet] = useState(false);
+  const [showStreetSuggestions, setShowStreetSuggestions] = useState(false);
 
   const products = [
     { id: '100g', name: t.products.small, price: 9.99 },
@@ -65,6 +68,61 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
 
     fetchCity();
   }, [formData.zip]);
+
+  // Street address autocomplete with debounce
+  useEffect(() => {
+    const searchStreet = async () => {
+      const query = formData.street.trim();
+      // Only search if we have at least 3 characters and a city/zip for better results
+      if (query.length >= 3) {
+        setIsLoadingStreet(true);
+        try {
+          // Use Photon API (OpenStreetMap) for German address search
+          const locationContext = formData.city || formData.zip;
+          const searchQuery = locationContext ? `${query}, ${locationContext}, Germany` : `${query}, Germany`;
+          const response = await fetch(
+            `https://photon.komoot.io/api/?q=${encodeURIComponent(searchQuery)}&limit=5&lang=de&layer=house`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            const suggestions = data.features
+              ?.filter((f: any) => f.properties.street && f.properties.country === 'Germany')
+              ?.map((f: any) => ({
+                display: `${f.properties.street} ${f.properties.housenumber || ''}, ${f.properties.postcode || ''} ${f.properties.city || f.properties.locality || ''}`.trim(),
+                street: f.properties.street,
+                housenumber: f.properties.housenumber || '',
+                postcode: f.properties.postcode || '',
+                city: f.properties.city || f.properties.locality || '',
+              }))
+              ?.slice(0, 5) || [];
+            setStreetSuggestions(suggestions);
+            setShowStreetSuggestions(suggestions.length > 0);
+          }
+        } catch (error) {
+          console.log('Could not fetch street suggestions');
+        } finally {
+          setIsLoadingStreet(false);
+        }
+      } else {
+        setStreetSuggestions([]);
+        setShowStreetSuggestions(false);
+      }
+    };
+
+    const debounce = setTimeout(searchStreet, 300);
+    return () => clearTimeout(debounce);
+  }, [formData.street, formData.city, formData.zip]);
+
+  const selectStreetSuggestion = (suggestion: typeof streetSuggestions[0]) => {
+    setFormData(prev => ({
+      ...prev,
+      street: `${suggestion.street} ${suggestion.housenumber}`.trim(),
+      zip: suggestion.postcode || prev.zip,
+      city: suggestion.city || prev.city,
+    }));
+    setShowStreetSuggestions(false);
+    setStreetSuggestions([]);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -219,20 +277,43 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
                 </div>
               </div>
 
-              {/* Street */}
-              <div>
+              {/* Street with autocomplete */}
+              <div className="relative">
                 <label className="block font-body text-sm font-medium text-foreground mb-2">
                   {t.order.street} *
                 </label>
-                <input
-                  type="text"
-                  name="street"
-                  value={formData.street}
-                  onChange={handleInputChange}
-                  placeholder={t.order.streetPlaceholder}
-                  required
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="street"
+                    value={formData.street}
+                    onChange={handleInputChange}
+                    onFocus={() => streetSuggestions.length > 0 && setShowStreetSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowStreetSuggestions(false), 200)}
+                    placeholder={t.order.streetPlaceholder}
+                    required
+                    autoComplete="off"
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  />
+                  {isLoadingStreet && (
+                    <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 animate-spin text-muted-foreground" />
+                  )}
+                </div>
+                {/* Street suggestions dropdown */}
+                {showStreetSuggestions && streetSuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-card border border-border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {streetSuggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => selectStreetSuggestion(suggestion)}
+                        className="w-full px-4 py-2 text-left text-sm hover:bg-secondary transition-colors border-b border-border last:border-b-0"
+                      >
+                        {suggestion.display}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* ZIP & City */}
