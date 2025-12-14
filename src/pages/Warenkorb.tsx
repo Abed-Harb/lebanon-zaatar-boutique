@@ -58,7 +58,13 @@ const WarenkorbContent = () => {
       if (error) throw error;
 
       if (data?.url) {
-        window.location.href = data.url;
+        // Open Stripe checkout in new tab
+        const stripeWindow = window.open(data.url, '_blank');
+        if (!stripeWindow) {
+          // Fallback if popup blocked
+          window.location.href = data.url;
+        }
+        setIsSubmitting(false);
       } else {
         throw new Error('Keine Checkout-URL erhalten');
       }
