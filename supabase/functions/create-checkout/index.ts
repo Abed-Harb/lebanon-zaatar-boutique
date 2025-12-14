@@ -17,6 +17,8 @@ const PRICES = {
   "delivery": "price_1ScxAuABEFDT4Lm9mrtX5zCo", // Update with new price ID for €1.99
 };
 
+const FREE_SHIPPING_THRESHOLD = 20; // Free shipping for orders €20+
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -42,17 +44,26 @@ serve(async (req) => {
       throw new Error("Invalid product selected");
     }
 
-    // Build line items - always include delivery
+    // Check if order qualifies for free shipping
+    const orderSubtotal = subtotal || 0;
+    const isFreeShipping = orderSubtotal >= FREE_SHIPPING_THRESHOLD;
+    
+    console.log("Shipping calculation", { orderSubtotal, isFreeShipping, threshold: FREE_SHIPPING_THRESHOLD });
+
+    // Build line items - only add delivery if not free shipping
     const lineItems = [
       {
         price: priceId,
         quantity: quantity,
       },
-      {
+    ];
+    
+    if (!isFreeShipping) {
+      lineItems.push({
         price: deliveryPriceId,
         quantity: 1,
-      },
-    ];
+      });
+    }
 
     // Create checkout session with product and conditional delivery
     const session = await stripe.checkout.sessions.create({

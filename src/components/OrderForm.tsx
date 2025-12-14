@@ -32,7 +32,10 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
 
   const selectedProductData = products.find(p => p.id === selectedProduct);
   const subtotal = selectedProductData ? selectedProductData.price * quantity : 0;
-  const delivery = 1.99;
+  const FREE_SHIPPING_THRESHOLD = 20;
+  const deliveryBase = 1.99;
+  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
+  const delivery = isFreeShipping ? 0 : deliveryBase;
   const total = subtotal + delivery;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -288,8 +291,17 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
                   </div>
                   <div className="flex justify-between font-body text-muted-foreground">
                     <span>{t.order.deliveryCost}</span>
-                    <span>€{delivery.toFixed(2).replace('.', ',')}</span>
+                    {isFreeShipping ? (
+                      <span className="text-primary font-medium">{t.products.freeShipping}</span>
+                    ) : (
+                      <span>€{delivery.toFixed(2).replace('.', ',')}</span>
+                    )}
                   </div>
+                  {!isFreeShipping && subtotal > 0 && (
+                    <div className="text-xs text-muted-foreground text-right">
+                      {t.products.freeShippingHint.replace('{amount}', (FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2).replace('.', ','))}
+                    </div>
+                  )}
                   <div className="flex justify-between font-heading text-xl font-bold text-foreground pt-3 border-t border-border">
                     <span>{t.order.total}</span>
                     <span className="text-primary">€{total.toFixed(2).replace('.', ',')}</span>
