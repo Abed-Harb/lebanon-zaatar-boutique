@@ -114,9 +114,9 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Retrieve the checkout session with shipping details
+    // Retrieve the checkout session (shipping_details is included by default, not expandable)
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ['line_items', 'shipping_details'],
+      expand: ['line_items'],
     });
     
     console.log("Full session shipping_details:", JSON.stringify(session.shipping_details));
