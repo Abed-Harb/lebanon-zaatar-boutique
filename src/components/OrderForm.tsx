@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { AlertTriangle, Minus, Plus, Loader2 } from 'lucide-react';
@@ -24,6 +24,7 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
   });
   const [quantity, setQuantity] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingCity, setIsLoadingCity] = useState(false);
 
   const products = [
     { id: '100g', name: t.products.small, price: 9.99 },
@@ -37,6 +38,32 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
   const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
   const delivery = isFreeShipping ? 0 : deliveryBase;
   const total = subtotal + delivery;
+
+  // Auto-fill city based on German PLZ
+  useEffect(() => {
+    const fetchCity = async () => {
+      const zip = formData.zip.trim();
+      // German PLZ is exactly 5 digits
+      if (zip.length === 5 && /^\d{5}$/.test(zip)) {
+        setIsLoadingCity(true);
+        try {
+          const response = await fetch(`https://api.zippopotam.us/de/${zip}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (data.places && data.places.length > 0) {
+              setFormData(prev => ({ ...prev, city: data.places[0]['place name'] }));
+            }
+          }
+        } catch (error) {
+          console.log('Could not fetch city for PLZ:', zip);
+        } finally {
+          setIsLoadingCity(false);
+        }
+      }
+    };
+
+    fetchCity();
+  }, [formData.zip]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -55,10 +82,10 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
       return;
     }
 
-    if (!formData.email) {
+    if (!formData.email || !formData.name || !formData.phone || !formData.street || !formData.zip || !formData.city) {
       toast({
         title: "Error",
-        description: "Please enter your email address",
+        description: "Bitte füllen Sie alle Pflichtfelder aus",
         variant: "destructive",
       });
       return;
@@ -76,6 +103,12 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
             name: formData.name,
             email: formData.email,
             phone: formData.phone,
+            address: {
+              line1: formData.street,
+              postal_code: formData.zip,
+              city: formData.city,
+              country: 'DE',
+            },
           },
         },
       });
@@ -194,10 +227,12 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
                     onChange={handleInputChange}
                     placeholder={t.order.zipPlaceholder}
                     required
+                    maxLength={5}
+                    pattern="\d{5}"
                     className="w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                   />
                 </div>
-                <div>
+                <div className="relative">
                   <label className="block font-body text-sm font-medium text-foreground mb-2">
                     {t.order.city} *
                   </label>
@@ -210,6 +245,9 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
                     required
                     className="w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                   />
+                  {isLoadingCity && (
+                    <Loader2 className="absolute right-3 top-10 w-4 h-4 animate-spin text-muted-foreground" />
+                  )}
                 </div>
               </div>
 

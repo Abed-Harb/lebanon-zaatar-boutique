@@ -146,7 +146,22 @@ serve(async (req) => {
     const customerName = session.metadata?.customer_name || session.shipping_details?.name || "Kunde";
     const customerEmail = session.customer_email || "";
     const customerPhone = session.metadata?.customer_phone || "";
-    const shippingAddress = session.shipping_details?.address;
+    
+    // Get shipping address - first try shipping_details, then fall back to metadata
+    const stripeShipping = session.shipping_details?.address;
+    const metadataAddress = {
+      line1: session.metadata?.shipping_line1,
+      postal_code: session.metadata?.shipping_postal_code,
+      city: session.metadata?.shipping_city,
+      country: session.metadata?.shipping_country,
+    };
+    
+    let shippingAddressStr = "Nicht angegeben";
+    if (stripeShipping?.line1) {
+      shippingAddressStr = `${stripeShipping.line1}, ${stripeShipping.postal_code} ${stripeShipping.city}, ${stripeShipping.country}`;
+    } else if (metadataAddress.line1) {
+      shippingAddressStr = `${metadataAddress.line1}, ${metadataAddress.postal_code} ${metadataAddress.city}, ${metadataAddress.country}`;
+    }
 
     const orderData = {
       productName,
@@ -154,9 +169,7 @@ serve(async (req) => {
       customerName,
       customerEmail,
       customerPhone,
-      shippingAddress: shippingAddress ? 
-        `${shippingAddress.line1}, ${shippingAddress.postal_code} ${shippingAddress.city}, ${shippingAddress.country}` : 
-        "Nicht angegeben",
+      shippingAddress: shippingAddressStr,
       paymentStatus: "BEZAHLT",
       sessionId: session.id,
     };
