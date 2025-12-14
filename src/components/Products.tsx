@@ -1,5 +1,6 @@
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Check, Truck, Gift } from 'lucide-react';
+import { Check, Truck, Gift, ShoppingCart } from 'lucide-react';
 import product from '@/assets/product.jpeg';
 
 interface ProductsProps {
@@ -9,6 +10,7 @@ interface ProductsProps {
 
 const Products = ({ selectedProduct, onSelectProduct }: ProductsProps) => {
   const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const products = [
     {
@@ -25,16 +27,9 @@ const Products = ({ selectedProduct, onSelectProduct }: ProductsProps) => {
     },
   ];
 
-  const scrollToOrder = () => {
-    const element = document.getElementById('order');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleSelectProduct = (productId: string) => {
+  const handleAddToCart = (productId: string) => {
     onSelectProduct(productId);
-    scrollToOrder();
+    navigate(`/warenkorb?product=${productId}&qty=1`);
   };
 
   return (
@@ -88,13 +83,10 @@ const Products = ({ selectedProduct, onSelectProduct }: ProductsProps) => {
                 </p>
 
                 <button
-                  onClick={() => handleSelectProduct(prod.id)}
-                  className={`w-full py-3 px-6 rounded-full font-body font-medium transition-all duration-300 ${
-                    selectedProduct === prod.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground'
-                  }`}
+                  onClick={() => handleAddToCart(prod.id)}
+                  className="w-full py-3 px-6 rounded-full font-body font-medium transition-all duration-300 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2"
                 >
+                  <ShoppingCart className="w-4 h-4" />
                   {t.products.addToCart}
                 </button>
               </div>
