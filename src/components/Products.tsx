@@ -12,6 +12,12 @@ const Products = ({ selectedProduct, onSelectProduct }: ProductsProps) => {
 
   const products = [
     {
+      id: '100g',
+      name: t.products.small,
+      price: 9.99,
+      weight: '100g',
+    },
+    {
       id: '200g',
       name: t.products.large,
       price: 15.99,

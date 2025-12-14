@@ -26,6 +26,7 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const products = [
+    { id: '100g', name: t.products.small, price: 9.99 },
     { id: '200g', name: t.products.large, price: 15.99 },
   ];
 
