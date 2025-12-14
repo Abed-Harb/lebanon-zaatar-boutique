@@ -14,7 +14,8 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
     street: '',
@@ -82,7 +83,7 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
       return;
     }
 
-    if (!formData.email || !formData.name || !formData.phone || !formData.street || !formData.zip || !formData.city) {
+    if (!formData.email || !formData.firstName || !formData.lastName || !formData.phone || !formData.street || !formData.zip || !formData.city) {
       toast({
         title: "Error",
         description: "Bitte füllen Sie alle Pflichtfelder aus",
@@ -90,6 +91,8 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
       });
       return;
     }
+
+    const fullName = `${formData.firstName} ${formData.lastName}`.trim();
 
     setIsSubmitting(true);
     
@@ -100,7 +103,9 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
           quantity: quantity,
           subtotal: subtotal,
           customerInfo: {
-            name: formData.name,
+            name: fullName,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
             email: formData.email,
             phone: formData.phone,
             address: {
@@ -150,20 +155,36 @@ const OrderForm = ({ selectedProduct, onProductChange }: OrderFormProps) => {
           <form onSubmit={handleSubmit} className="grid lg:grid-cols-5 gap-8">
             {/* Form Fields */}
             <div className="lg:col-span-3 space-y-6">
-              {/* Name */}
-              <div>
-                <label className="block font-body text-sm font-medium text-foreground mb-2">
-                  {t.order.name} *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder={t.order.namePlaceholder}
-                  required
-                  className="w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                />
+              {/* First Name & Last Name */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-body text-sm font-medium text-foreground mb-2">
+                    Vorname *
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    placeholder="Max"
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block font-body text-sm font-medium text-foreground mb-2">
+                    Nachname *
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    placeholder="Mustermann"
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                  />
+                </div>
               </div>
 
               {/* Email & Phone */}
