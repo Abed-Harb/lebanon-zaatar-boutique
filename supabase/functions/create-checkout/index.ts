@@ -7,13 +7,13 @@ const corsHeaders = {
 };
 
 // Price IDs for products (TEST MODE)
+// TODO: Update these price IDs after creating new products in Stripe
+// 200g Za'atar: €15.99
+// Delivery: €1.99
 const PRICES = {
-  "100g": "price_1ScxALABEFDT4Lm9mbXE2R2j",
-  "200g": "price_1ScxAbABEFDT4Lm9ALqnoSTY",
-  "delivery": "price_1ScxAuABEFDT4Lm9mrtX5zCo",
+  "200g": "price_1ScxAbABEFDT4Lm9ALqnoSTY", // Update this with new price ID for €15.99
+  "delivery": "price_1ScxAuABEFDT4Lm9mrtX5zCo", // Update this with new price ID for €1.99
 };
-
-const FREE_SHIPPING_THRESHOLD = 20; // Free shipping for orders €20+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -33,29 +33,20 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    const priceId = PRICES[productId as keyof typeof PRICES];
+    const priceId = PRICES["200g"];
     const deliveryPriceId = PRICES.delivery;
-    
-    // Check if order qualifies for free shipping
-    const orderSubtotal = subtotal || 0;
-    const isFreeShipping = orderSubtotal >= FREE_SHIPPING_THRESHOLD;
-    
-    console.log("Shipping calculation", { orderSubtotal, isFreeShipping, threshold: FREE_SHIPPING_THRESHOLD });
 
-    // Build line items - only add delivery if not free shipping
+    // Build line items - always include delivery
     const lineItems = [
       {
         price: priceId,
         quantity: quantity,
       },
-    ];
-    
-    if (!isFreeShipping) {
-      lineItems.push({
+      {
         price: deliveryPriceId,
         quantity: 1,
-      });
-    }
+      },
+    ];
 
     // Create checkout session with product and conditional delivery
     const session = await stripe.checkout.sessions.create({

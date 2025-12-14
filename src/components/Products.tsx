@@ -1,5 +1,5 @@
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Check, Truck, Gift } from 'lucide-react';
+import { Check, Truck } from 'lucide-react';
 import product from '@/assets/product.jpeg';
 
 interface ProductsProps {
@@ -12,15 +12,9 @@ const Products = ({ selectedProduct, onSelectProduct }: ProductsProps) => {
 
   const products = [
     {
-      id: '100g',
-      name: t.products.small,
-      price: 9.99,
-      weight: '100g',
-    },
-    {
       id: '200g',
       name: t.products.large,
-      price: 18.49,
+      price: 15.99,
       weight: '200g',
     },
   ];
@@ -60,11 +54,6 @@ const Products = ({ selectedProduct, onSelectProduct }: ProductsProps) => {
                 </div>
               )}
 
-              {/* Free Shipping Badge */}
-              <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-medium shadow-md">
-                <Gift className="w-3.5 h-3.5" />
-                <span>{t.products.freeShippingBadge}</span>
-              </div>
 
               {/* Product Image */}
               <div className="mb-6 rounded-xl overflow-hidden">
@@ -107,7 +96,7 @@ const Products = ({ selectedProduct, onSelectProduct }: ProductsProps) => {
           <div className="inline-flex items-center gap-2 px-6 py-3 bg-primary/10 rounded-full shadow-soft border border-primary/20">
             <Truck className="w-5 h-5 text-primary" />
             <span className="font-body text-foreground">
-              {t.products.freeShippingOver}
+              {t.products.shippingCost}
             </span>
           </div>
         </div>
