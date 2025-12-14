@@ -6,15 +6,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Price IDs for products (TEST MODE)
-// TODO: Update these price IDs after creating new products in Stripe
+// Price IDs for products - CORRECT PRICES
 // 100g Za'atar: €9.99
 // 200g Za'atar: €15.99
 // Delivery: €1.99
 const PRICES = {
-  "100g": "price_1ScxALABEFDT4Lm9mbXE2R2j", // Update with new price ID for €9.99
-  "200g": "price_1ScxAbABEFDT4Lm9ALqnoSTY", // Update with new price ID for €15.99
-  "delivery": "price_1ScxAuABEFDT4Lm9mrtX5zCo", // Update with new price ID for €1.99
+  "100g": "price_1SeOsuABEFDT4Lm9U9s3uPAt", // €9.99
+  "200g": "price_1SeOsjABEFDT4Lm9zGecNSZ4", // €15.99
+  "delivery": "price_1SeOtDABEFDT4Lm9gSCFaNOk", // €1.99
 };
 
 const FREE_SHIPPING_THRESHOLD = 20; // Free shipping for orders €20+
