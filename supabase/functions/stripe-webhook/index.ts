@@ -6,6 +6,46 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Send WhatsApp notification via Twilio
+async function sendWhatsAppNotification(message: string) {
+  const accountSid = Deno.env.get("TWILIO_ACCOUNT_SID");
+  const authToken = Deno.env.get("TWILIO_AUTH_TOKEN");
+  const fromNumber = Deno.env.get("TWILIO_WHATSAPP_FROM");
+  const toNumber = Deno.env.get("NOTIFICATION_PHONE");
+
+  if (!accountSid || !authToken || !fromNumber || !toNumber) {
+    console.log("WhatsApp credentials not configured, skipping notification");
+    return;
+  }
+
+  try {
+    const url = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
+    const auth = btoa(`${accountSid}:${authToken}`);
+    
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Authorization": `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        From: fromNumber.startsWith("whatsapp:") ? fromNumber : `whatsapp:${fromNumber}`,
+        To: toNumber.startsWith("whatsapp:") ? toNumber : `whatsapp:${toNumber}`,
+        Body: message,
+      }),
+    });
+
+    if (response.ok) {
+      console.log("WhatsApp notification sent successfully!");
+    } else {
+      const errorText = await response.text();
+      console.error("Failed to send WhatsApp:", errorText);
+    }
+  } catch (error) {
+    console.error("WhatsApp error:", error);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -109,6 +149,10 @@ serve(async (req) => {
             console.error("Failed to send customer email:", await customerEmailResponse.text());
           }
         }
+
+        // Send WhatsApp notification to owner
+        const whatsappMessage = `🎉 NEUE BESTELLUNG!\n\n📦 Produkt: ${productName}\n📊 Menge: ${quantity}x\n👤 Kunde: ${customerName}\n📧 Email: ${customerEmail}\n📱 Tel: ${customerPhone || "Nicht angegeben"}\n📍 Adresse: ${orderData.shippingAddress}\n\n✅ BEZAHLT`;
+        await sendWhatsAppNotification(whatsappMessage);
       } else {
         console.warn("Missing Supabase credentials");
       }
