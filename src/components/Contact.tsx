@@ -24,10 +24,10 @@ const Contact = () => {
                 {t.contact.email}
               </h3>
               <a 
-                href="mailto:info@zaatarati.de" 
+                href="mailto:zaataratilibanon@gmail.com" 
                 className="font-body text-muted-foreground hover:text-primary transition-colors"
               >
-                info@zaatarati.de
+                zaataratilibanon@gmail.com
               </a>
             </div>
 
@@ -39,10 +39,10 @@ const Contact = () => {
                 {t.contact.phone}
               </h3>
               <a 
-                href="tel:+4912345678" 
+                href="tel:+4917630733000" 
                 className="font-body text-muted-foreground hover:text-primary transition-colors"
               >
-                +49 123 456 78
+                +49 176 30733000
               </a>
             </div>
 
@@ -54,7 +54,7 @@ const Contact = () => {
                 {t.contact.location}
               </h3>
               <p className="font-body text-muted-foreground">
-                Berlin, Deutschland
+                72202 Nagold, Deutschland
               </p>
             </div>
           </div>
