@@ -21,8 +21,7 @@ const Impressum = () => {
               </h2>
               <p>
                 Za'atarati<br />
-                [Ihre Straße und Hausnummer]<br />
-                [PLZ Stadt]<br />
+                72202 Nagold<br />
                 Deutschland
               </p>
             </section>
@@ -32,7 +31,8 @@ const Impressum = () => {
                 {language === 'de' ? 'Kontakt' : 'Contact'}
               </h2>
               <p>
-                {language === 'de' ? 'E-Mail' : 'Email'}: info@zaatarati.de
+                {language === 'de' ? 'E-Mail' : 'Email'}: zaataratilibanon@gmail.com<br />
+                {language === 'de' ? 'Telefon' : 'Phone'}: +49 176 30733000
               </p>
             </section>
 

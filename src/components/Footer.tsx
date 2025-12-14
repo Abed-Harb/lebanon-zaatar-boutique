@@ -31,11 +31,11 @@ const Footer = () => {
               {t.footer.contact}
             </h4>
             <a 
-              href="mailto:info@zaatarati.de" 
+              href="mailto:zaataratilibanon@gmail.com" 
               className="inline-flex items-center gap-2 font-body text-sm opacity-80 hover:opacity-100 transition-opacity"
             >
               <Mail className="w-4 h-4" />
-              info@zaatarati.de
+              zaataratilibanon@gmail.com
             </a>
           </div>
 
