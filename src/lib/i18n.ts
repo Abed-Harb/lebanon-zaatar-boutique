@@ -35,10 +35,7 @@ export const translations = {
       large: '200g Beutel',
       addToCart: 'Auswählen',
       delivery: 'Versand',
-      freeShipping: 'GRATIS',
-      freeShippingOver: 'Kostenloser Versand ab €20',
-      freeShippingHint: 'Noch €{amount} bis zum kostenlosen Versand',
-      freeShippingBadge: 'Gratis Versand ab €20',
+      shippingCost: 'Versand: €1,99',
     },
     order: {
       title: 'Bestellung aufgeben',
@@ -178,10 +175,7 @@ export const translations = {
       large: '200g Pack',
       addToCart: 'Select',
       delivery: 'Shipping',
-      freeShipping: 'FREE',
-      freeShippingOver: 'Free shipping on orders over €20',
-      freeShippingHint: '€{amount} more for free shipping',
-      freeShippingBadge: 'Free shipping €20+',
+      shippingCost: 'Shipping: €1.99',
     },
     order: {
       title: 'Place Your Order',
