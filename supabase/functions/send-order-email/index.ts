@@ -110,7 +110,11 @@ serve(async (req: Request) => {
       </div>
     `;
 
-    console.log("Sending email via Resend API...");
+    // With onboarding@resend.dev, we can only send to the verified account email
+    // So we always send to zaataratilibanon@gmail.com
+    const verifiedEmail = "zaataratilibanon@gmail.com";
+    console.log(`Sending email via Resend API to verified email: ${verifiedEmail}`);
+    console.log(`Original recipient was: ${recipientEmail}, email type: ${emailType}`);
 
     // Use fetch directly to Resend API
     const response = await fetch("https://api.resend.com/emails", {
@@ -121,8 +125,8 @@ serve(async (req: Request) => {
       },
       body: JSON.stringify({
         from: "Za'atarati <onboarding@resend.dev>",
-        to: [recipientEmail],
-        subject,
+        to: [verifiedEmail],
+        subject: isCustomer ? `[KOPIE FÜR KUNDE: ${recipientEmail}] ${subject}` : subject,
         html,
       }),
     });
