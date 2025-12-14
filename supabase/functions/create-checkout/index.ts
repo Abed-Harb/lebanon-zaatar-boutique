@@ -65,6 +65,9 @@ serve(async (req) => {
       });
     }
 
+    // Build shipping options - use the address provided by the customer
+    const shippingAddress = customerInfo?.address;
+    
     // Create checkout session with product and conditional delivery
     const session = await stripe.checkout.sessions.create({
       // Let Stripe show all payment methods enabled in your dashboard
@@ -73,12 +76,18 @@ serve(async (req) => {
       success_url: `${req.headers.get("origin")}/order-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/#order`,
       customer_email: customerInfo?.email,
+      // Pre-fill shipping address if provided
       shipping_address_collection: {
         allowed_countries: ["DE"],
       },
+      // Pass customer info in metadata for order processing
       metadata: {
         customer_name: customerInfo?.name || "",
         customer_phone: customerInfo?.phone || "",
+        shipping_line1: shippingAddress?.line1 || "",
+        shipping_postal_code: shippingAddress?.postal_code || "",
+        shipping_city: shippingAddress?.city || "",
+        shipping_country: shippingAddress?.country || "DE",
       },
     });
 
