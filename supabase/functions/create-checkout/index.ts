@@ -25,9 +25,9 @@ serve(async (req) => {
   }
 
   try {
-    const { productId, quantity, subtotal, customerInfo } = await req.json();
+    const { productId, quantity, subtotal } = await req.json();
     
-    console.log("Creating checkout session", { productId, quantity, subtotal, customerInfo });
+    console.log("Creating checkout session", { productId, quantity, subtotal });
 
     if (!productId || !PRICES[productId as keyof typeof PRICES]) {
       throw new Error("Invalid product selected");
@@ -65,34 +65,25 @@ serve(async (req) => {
       });
     }
 
-    // Build shipping options - use the address provided by the customer
-    const shippingAddress = customerInfo?.address;
-    
-    // Create checkout session with product and conditional delivery
+    // Create checkout session - Stripe collects all customer info
     const session = await stripe.checkout.sessions.create({
-      // Let Stripe show all payment methods enabled in your dashboard
       line_items: lineItems,
       mode: "payment",
       success_url: `${req.headers.get("origin")}/order-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/#order`,
-      customer_email: customerInfo?.email,
-      // Pre-fill shipping address if provided
+      cancel_url: `${req.headers.get("origin")}/warenkorb`,
+      // Collect shipping address in Stripe
       shipping_address_collection: {
-        allowed_countries: ["DE"],
+        allowed_countries: ["DE", "AT", "CH"],
       },
-      // Pass customer info in metadata for order processing
-      metadata: {
-        customer_name: customerInfo?.name || "",
-        customer_phone: customerInfo?.phone || "",
-        shipping_line1: shippingAddress?.line1 || "",
-        shipping_postal_code: shippingAddress?.postal_code || "",
-        shipping_city: shippingAddress?.city || "",
-        shipping_country: shippingAddress?.country || "DE",
+      // Collect phone number
+      phone_number_collection: {
+        enabled: true,
       },
+      // Allow promo codes
+      allow_promotion_codes: true,
     });
 
     console.log("Checkout session created", { sessionId: session.id, url: session.url });
-    // Email notification is now handled by stripe-webhook after payment confirmation
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
