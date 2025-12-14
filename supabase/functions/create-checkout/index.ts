@@ -8,11 +8,13 @@ const corsHeaders = {
 
 // Price IDs for products (TEST MODE)
 // TODO: Update these price IDs after creating new products in Stripe
+// 100g Za'atar: €9.99
 // 200g Za'atar: €15.99
 // Delivery: €1.99
 const PRICES = {
-  "200g": "price_1ScxAbABEFDT4Lm9ALqnoSTY", // Update this with new price ID for €15.99
-  "delivery": "price_1ScxAuABEFDT4Lm9mrtX5zCo", // Update this with new price ID for €1.99
+  "100g": "price_1ScxALABEFDT4Lm9mbXE2R2j", // Update with new price ID for €9.99
+  "200g": "price_1ScxAbABEFDT4Lm9ALqnoSTY", // Update with new price ID for €15.99
+  "delivery": "price_1ScxAuABEFDT4Lm9mrtX5zCo", // Update with new price ID for €1.99
 };
 
 serve(async (req) => {
@@ -33,8 +35,12 @@ serve(async (req) => {
       apiVersion: "2025-08-27.basil",
     });
 
-    const priceId = PRICES["200g"];
+    const priceId = PRICES[productId as keyof typeof PRICES];
     const deliveryPriceId = PRICES.delivery;
+    
+    if (!priceId) {
+      throw new Error("Invalid product selected");
+    }
 
     // Build line items - always include delivery
     const lineItems = [
