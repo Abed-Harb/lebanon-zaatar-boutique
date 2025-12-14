@@ -70,7 +70,7 @@ serve(async (req) => {
       // Let Stripe show all payment methods enabled in your dashboard
       line_items: lineItems,
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/order-success`,
+      success_url: `${req.headers.get("origin")}/order-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/#order`,
       customer_email: customerInfo?.email,
       shipping_address_collection: {
