@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,7 +30,7 @@ function generateOrderNumber(sessionId: string): string {
 }
 
 serve(async (req: Request) => {
-  console.log("=== SEND-ORDER-EMAIL FUNCTION STARTED ===");
+  console.log("=== SEND-ORDER-EMAIL FUNCTION STARTED (Gmail SMTP) ===");
   
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -43,33 +44,25 @@ serve(async (req: Request) => {
     
     console.log(`Sending ${emailType} email to:`, recipientEmail);
 
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    console.log("RESEND_API_KEY exists:", !!resendApiKey);
-    console.log("RESEND_API_KEY length:", resendApiKey?.length || 0);
+    const gmailAppPassword = Deno.env.get("GMAIL_APP_PASSWORD");
+    const gmailUser = "zaataratilibanon@gmail.com";
+    
+    console.log("GMAIL_APP_PASSWORD exists:", !!gmailAppPassword);
+    console.log("GMAIL_APP_PASSWORD length:", gmailAppPassword?.length || 0);
 
-    if (!resendApiKey) {
-      throw new Error("RESEND_API_KEY is not configured");
+    if (!gmailAppPassword) {
+      throw new Error("GMAIL_APP_PASSWORD is not configured");
     }
 
     const isCustomer = emailType === "customer";
     const orderNumber = generateOrderNumber(orderDetails.sessionId || Date.now().toString());
-    
-    // For customer emails, we add forwarding instructions at the top
-    const forwardingHeader = isCustomer ? `
-      <div style="background-color: #fef3c7; border: 2px solid #f59e0b; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-        <p style="margin: 0; color: #92400e; font-weight: bold;">📧 BITTE AN KUNDE WEITERLEITEN:</p>
-        <p style="margin: 5px 0 0 0; color: #92400e; font-size: 18px;"><strong>${recipientEmail}</strong></p>
-      </div>
-    ` : '';
 
     const subject = isCustomer 
-      ? `⏩ WEITERLEITEN AN: ${recipientEmail} - Bestellbestätigung #${orderNumber}` 
+      ? `Bestellbestätigung #${orderNumber} - Za'atarati` 
       : `🆕 Neue Bestellung #${orderNumber} - BEZAHLT`;
 
     const customerEmailContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
-        ${forwardingHeader}
-        
         <div style="text-align: center; margin-bottom: 30px;">
           <h1 style="color: #4a5d23; margin: 0;">Za'atarati</h1>
           <p style="color: #8B7355; margin: 5px 0;">Lebanese Mix</p>
@@ -124,40 +117,35 @@ serve(async (req: Request) => {
 
     const html = isCustomer ? customerEmailContent : ownerEmailContent;
 
-    // With onboarding@resend.dev, we can only send to the verified account email
-    // So we always send to zaataratilibanon@gmail.com
-    const verifiedEmail = "zaataratilibanon@gmail.com";
-    console.log(`Sending email via Resend API to verified email: ${verifiedEmail}`);
-    console.log(`Original recipient was: ${recipientEmail}, email type: ${emailType}`);
+    console.log("Connecting to Gmail SMTP...");
 
-    // Use fetch directly to Resend API
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${resendApiKey}`,
-        "Content-Type": "application/json",
+    // Create SMTP client for Gmail
+    const client = new SMTPClient({
+      connection: {
+        hostname: "smtp.gmail.com",
+        port: 465,
+        tls: true,
+        auth: {
+          username: gmailUser,
+          password: gmailAppPassword,
+        },
       },
-      body: JSON.stringify({
-        from: "Za'atarati <onboarding@resend.dev>",
-        to: [verifiedEmail],
-        subject,
-        html,
-      }),
     });
 
-    const responseText = await response.text();
-    console.log("Resend API response status:", response.status);
-    console.log("Resend API response:", responseText);
+    await client.send({
+      from: gmailUser,
+      to: recipientEmail,
+      subject: subject,
+      content: "Please view this email in an HTML-compatible email client.",
+      html: html,
+    });
 
-    if (!response.ok) {
-      throw new Error(`Resend API error: ${response.status} - ${responseText}`);
-    }
+    await client.close();
 
-    const data = JSON.parse(responseText);
-    console.log("Email sent successfully! ID:", data?.id);
+    console.log(`Email sent successfully to ${recipientEmail}!`);
 
     return new Response(
-      JSON.stringify({ success: true, id: data?.id, orderNumber }),
+      JSON.stringify({ success: true, orderNumber }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error: unknown) {
