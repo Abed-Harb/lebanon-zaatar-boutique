@@ -63,7 +63,7 @@ const Header = () => {
             <div className="flex items-center bg-card rounded-full p-1">
               <button
                 onClick={() => setLanguage('de')}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
+                className={`px-2 py-1 rounded-full text-sm font-medium transition-all ${
                   language === 'de' 
                     ? 'bg-primary text-primary-foreground' 
                     : 'text-muted-foreground hover:text-foreground'
@@ -73,13 +73,23 @@ const Header = () => {
               </button>
               <button
                 onClick={() => setLanguage('en')}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
+                className={`px-2 py-1 rounded-full text-sm font-medium transition-all ${
                   language === 'en' 
                     ? 'bg-primary text-primary-foreground' 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 EN
+              </button>
+              <button
+                onClick={() => setLanguage('ar')}
+                className={`px-2 py-1 rounded-full text-sm font-medium transition-all ${
+                  language === 'ar' 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                ع
               </button>
             </div>
 
