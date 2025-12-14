@@ -150,8 +150,8 @@ serve(async (req) => {
     const customerEmail = session.customer_details?.email || session.customer_email || "";
     const customerPhone = session.customer_details?.phone || session.shipping_details?.phone || "";
     
-    // Get shipping address from shipping_details
-    const stripeShipping = session.shipping_details?.address;
+    // Get shipping address from shipping_details OR customer_details.address as fallback
+    const stripeShipping = session.shipping_details?.address || session.customer_details?.address;
     console.log("Stripe shipping address:", JSON.stringify(stripeShipping));
     
     let shippingAddressStr = "Nicht angegeben";
