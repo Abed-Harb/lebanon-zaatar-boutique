@@ -31,7 +31,8 @@ const WarenkorbContent = () => {
 
   const selectedProductData = products.find(p => p.id === selectedProduct);
   const subtotal = selectedProductData ? selectedProductData.price * quantity : 0;
-  const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
+  const isTestProduct = selectedProduct === 'test';
+  const isFreeShipping = isTestProduct || subtotal >= FREE_SHIPPING_THRESHOLD;
   const delivery = isFreeShipping ? 0 : DELIVERY_COST;
   const total = subtotal + delivery;
 
