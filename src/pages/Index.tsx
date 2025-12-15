@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { LanguageProvider } from '@/contexts/LanguageContext';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 import About from '@/components/About';
@@ -19,29 +18,27 @@ const Index = () => {
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null);
 
   return (
-    <LanguageProvider>
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main>
-          <Hero />
-          <About />
-          <Mankousheh />
-          <Products 
-            selectedProduct={selectedProduct} 
-            onSelectProduct={setSelectedProduct} 
-          />
-          <TrustBadges />
-          <Testimonials />
-          <Recipes />
-          <FAQ />
-          <Contact />
-          <Newsletter />
-        </main>
-        <Footer />
-        <WhatsAppButton />
-        <CookieBanner />
-      </div>
-    </LanguageProvider>
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main>
+        <Hero />
+        <About />
+        <Mankousheh />
+        <Products 
+          selectedProduct={selectedProduct} 
+          onSelectProduct={setSelectedProduct} 
+        />
+        <TrustBadges />
+        <Testimonials />
+        <Recipes />
+        <FAQ />
+        <Contact />
+        <Newsletter />
+      </main>
+      <Footer />
+      <WhatsAppButton />
+      <CookieBanner />
+    </div>
   );
 };
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Cookie, X } from 'lucide-react';
-
 const CookieBanner = () => {
   const { t } = useLanguage();
   const [isVisible, setIsVisible] = useState(false);
@@ -41,9 +41,9 @@ const CookieBanner = () => {
                 </h3>
                 <p className="font-body text-sm text-muted-foreground">
                   {t.cookies.description}{' '}
-                  <a href="/datenschutz" className="text-primary hover:underline">
+                  <Link to="/datenschutz" className="text-primary hover:underline">
                     {t.cookies.learnMore}
-                  </a>
+                  </Link>
                 </p>
               </div>
             </div>
