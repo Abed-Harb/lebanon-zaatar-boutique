@@ -9,6 +9,7 @@ import Footer from '@/components/Footer';
 import product from '@/assets/product.jpeg';
 
 const products = [
+  { id: 'test', name: "Test", price: 0.50, weight: 'Test' },
   { id: '100g', name: "Za'atar 100g", price: 9.99, weight: '100g' },
   { id: '200g', name: "Za'atar 200g", price: 15.99, weight: '200g' },
 ];
