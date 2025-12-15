@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import Index from "./pages/Index";
 import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
+import AGB from "./pages/AGB";
 import OrderSuccess from "./pages/OrderSuccess";
 import Warenkorb from "./pages/Warenkorb";
 import AdminShipping from "./pages/AdminShipping";
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/impressum" element={<Impressum />} />
             <Route path="/datenschutz" element={<Datenschutz />} />
+            <Route path="/agb" element={<AGB />} />
             <Route path="/order-success" element={<OrderSuccess />} />
             <Route path="/warenkorb" element={<Warenkorb />} />
             <Route path="/admin/shipping" element={<AdminShipping />} />
