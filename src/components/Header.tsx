@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import logo from '@/assets/logo-new.jpg';
@@ -6,20 +7,28 @@ import logo from '@/assets/logo-new.jpg';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const location = useLocation();
+  const isHomePage = location.pathname === '/';
 
   const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    if (isHomePage) {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
     setIsMenuOpen(false);
+  };
+
+  const getNavLink = (sectionId: string) => {
+    return isHomePage ? `#${sectionId}` : `/#${sectionId}`;
   };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img 
               src={logo} 
               alt="Za'atarati Logo" 
@@ -28,34 +37,38 @@ const Header = () => {
             <span className="font-heading text-xl md:text-2xl font-semibold text-primary">
               Za'atarati
             </span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
-            <button 
+            <Link 
+              to={getNavLink('home')}
               onClick={() => scrollToSection('home')}
               className="font-body text-foreground hover:text-primary transition-colors"
             >
               {t.nav.home}
-            </button>
-            <button 
+            </Link>
+            <Link 
+              to={getNavLink('about')}
               onClick={() => scrollToSection('about')}
               className="font-body text-foreground hover:text-primary transition-colors"
             >
               {t.nav.about}
-            </button>
-            <button 
+            </Link>
+            <Link 
+              to={getNavLink('products')}
               onClick={() => scrollToSection('products')}
               className="font-body text-foreground hover:text-primary transition-colors"
             >
               {t.nav.products}
-            </button>
-            <button 
+            </Link>
+            <Link 
+              to={getNavLink('order')}
               onClick={() => scrollToSection('order')}
               className="font-body text-foreground hover:text-primary transition-colors"
             >
               {t.nav.order}
-            </button>
+            </Link>
           </nav>
 
           <div className="flex items-center gap-4">
@@ -107,30 +120,34 @@ const Header = () => {
         {isMenuOpen && (
           <nav className="md:hidden py-4 border-t border-border animate-fade-in">
             <div className="flex flex-col gap-4">
-              <button 
+              <Link 
+                to={getNavLink('home')}
                 onClick={() => scrollToSection('home')}
                 className="font-body text-foreground hover:text-primary transition-colors text-left py-2"
               >
                 {t.nav.home}
-              </button>
-              <button 
+              </Link>
+              <Link 
+                to={getNavLink('about')}
                 onClick={() => scrollToSection('about')}
                 className="font-body text-foreground hover:text-primary transition-colors text-left py-2"
               >
                 {t.nav.about}
-              </button>
-              <button 
+              </Link>
+              <Link 
+                to={getNavLink('products')}
                 onClick={() => scrollToSection('products')}
                 className="font-body text-foreground hover:text-primary transition-colors text-left py-2"
               >
                 {t.nav.products}
-              </button>
-              <button 
+              </Link>
+              <Link 
+                to={getNavLink('order')}
                 onClick={() => scrollToSection('order')}
                 className="font-body text-foreground hover:text-primary transition-colors text-left py-2"
               >
                 {t.nav.order}
-              </button>
+              </Link>
             </div>
           </nav>
         )}
