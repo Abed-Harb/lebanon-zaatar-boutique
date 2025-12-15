@@ -1,10 +1,26 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+// Input validation schema
+const VerifyPaymentSchema = z.object({
+  sessionId: z.string().min(1).max(500).regex(/^cs_/, "Invalid session ID format"),
+});
+
+// HTML escape function
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 // Send WhatsApp notification via Twilio
 async function sendWhatsAppNotification(message: string) {
@@ -103,18 +119,26 @@ serve(async (req) => {
   }
 
   try {
-    const { sessionId } = await req.json();
-    console.log("Verifying session:", sessionId);
-
-    if (!sessionId) {
-      throw new Error("No session ID provided");
+    const rawBody = await req.json();
+    
+    // Validate input
+    const validationResult = VerifyPaymentSchema.safeParse(rawBody);
+    if (!validationResult.success) {
+      console.error("Validation failed:", validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ error: "Invalid input: " + validationResult.error.errors.map(e => e.message).join(", ") }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+      );
     }
+
+    const { sessionId } = validationResult.data;
+    console.log("Verifying session:", sessionId);
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
 
-    // Retrieve the checkout session - shipping_details is included by default
+    // Retrieve the checkout session
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ['line_items'],
     });
@@ -122,7 +146,6 @@ serve(async (req) => {
     console.log("Session customer_details:", JSON.stringify(session.customer_details));
     console.log("Session shipping_details:", JSON.stringify(session.shipping_details));
     console.log("Session customer_email:", session.customer_email);
-
     console.log("Session status:", session.payment_status);
 
     if (session.payment_status !== "paid") {
@@ -135,7 +158,7 @@ serve(async (req) => {
       });
     }
 
-    // Extract order details
+    // Extract order details (data comes from Stripe, already validated by payment)
     const lineItems = session.line_items?.data || [];
     const productItem = lineItems.find((item: any) => 
       !item.description?.toLowerCase().includes("delivery") && 
@@ -150,7 +173,7 @@ serve(async (req) => {
     const customerEmail = session.customer_details?.email || session.customer_email || "";
     const customerPhone = session.customer_details?.phone || session.shipping_details?.phone || "";
     
-    // Get shipping address from shipping_details OR customer_details.address as fallback
+    // Get shipping address
     const stripeShipping = session.shipping_details?.address || session.customer_details?.address;
     console.log("Stripe shipping address:", JSON.stringify(stripeShipping));
     
@@ -163,12 +186,12 @@ serve(async (req) => {
     console.log("Final shipping address:", shippingAddressStr);
 
     const orderData = {
-      productName,
+      productName: escapeHtml(productName),
       quantity,
-      customerName,
-      customerEmail,
-      customerPhone,
-      shippingAddress: shippingAddressStr,
+      customerName: escapeHtml(customerName),
+      customerEmail: escapeHtml(customerEmail),
+      customerPhone: escapeHtml(customerPhone),
+      shippingAddress: escapeHtml(shippingAddressStr),
       paymentStatus: "BEZAHLT",
       sessionId: session.id,
     };
@@ -176,7 +199,7 @@ serve(async (req) => {
     console.log("Order data:", orderData);
 
     // Send WhatsApp notification to owner
-    const whatsappMessage = `🎉 NEUE BESTELLUNG!\n\n📦 Produkt: ${productName}\n📊 Menge: ${quantity}x\n👤 Kunde: ${customerName}\n📧 Email: ${customerEmail}\n📱 Tel: ${customerPhone || "Nicht angegeben"}\n📍 Adresse: ${orderData.shippingAddress}\n\n✅ BEZAHLT`;
+    const whatsappMessage = `🎉 NEUE BESTELLUNG!\n\n📦 Produkt: ${productName}\n📊 Menge: ${quantity}x\n👤 Kunde: ${customerName}\n📧 Email: ${customerEmail}\n📱 Tel: ${customerPhone || "Nicht angegeben"}\n📍 Adresse: ${shippingAddressStr}\n\n✅ BEZAHLT`;
     
     const whatsappSent = await sendWhatsAppNotification(whatsappMessage);
     console.log("WhatsApp sent:", whatsappSent);
