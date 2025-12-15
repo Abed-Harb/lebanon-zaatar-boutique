@@ -78,6 +78,12 @@ const Footer = () => {
             >
               {language === 'de' ? 'Datenschutz' : 'Privacy Policy'}
             </Link>
+            <Link 
+              to="/agb" 
+              className="font-body text-sm opacity-70 hover:opacity-100 transition-opacity"
+            >
+              AGB
+            </Link>
           </div>
           <p className="font-body text-sm opacity-60">
             © {currentYear} Za'atarati. {t.footer.rights}.
