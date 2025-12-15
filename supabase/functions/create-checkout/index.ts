@@ -10,9 +10,11 @@ const corsHeaders = {
 // 100g Za'atar: €9.99
 // 200g Za'atar: €15.99
 // Delivery: €1.99
+// Test: €0.50 (free delivery)
 const PRICES = {
   "100g": "price_1SeOsuABEFDT4Lm9U9s3uPAt", // €9.99
   "200g": "price_1SeOsjABEFDT4Lm9zGecNSZ4", // €15.99
+  "test": "price_1SePfDJZaJZQqwlbRHSaIzaH", // €0.50 TEST
   "delivery": "price_1SeOtDABEFDT4Lm9gSCFaNOk", // €1.99
 };
 
@@ -43,11 +45,12 @@ serve(async (req) => {
       throw new Error("Invalid product selected");
     }
 
-    // Check if order qualifies for free shipping
+    // Check if order qualifies for free shipping (test product always free)
     const orderSubtotal = subtotal || 0;
-    const isFreeShipping = orderSubtotal >= FREE_SHIPPING_THRESHOLD;
+    const isTestProduct = productId === "test";
+    const isFreeShipping = isTestProduct || orderSubtotal >= FREE_SHIPPING_THRESHOLD;
     
-    console.log("Shipping calculation", { orderSubtotal, isFreeShipping, threshold: FREE_SHIPPING_THRESHOLD });
+    console.log("Shipping calculation", { orderSubtotal, isFreeShipping, isTestProduct, threshold: FREE_SHIPPING_THRESHOLD });
 
     // Build line items - only add delivery if not free shipping
     const lineItems = [
