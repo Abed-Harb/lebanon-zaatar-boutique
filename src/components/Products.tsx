@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Check, Truck, Gift, ShoppingCart } from 'lucide-react';
+import { Check, Truck, Heart, ShoppingCart } from 'lucide-react';
 import product from '@/assets/product.jpeg';
 
 interface ProductsProps {
@@ -57,8 +57,8 @@ const Products = ({ selectedProduct, onSelectProduct }: ProductsProps) => {
 
               {/* Free Shipping Badge */}
               <div className="absolute top-4 left-4 flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-medium shadow-md">
-                <Gift className="w-3.5 h-3.5" />
-                <span>{t.products.freeShippingBadge}</span>
+                <Heart className="w-3.5 h-3.5 fill-current" />
+                <span>Kostenloser Versand ab €20</span>
               </div>
 
               {/* Product Image */}
