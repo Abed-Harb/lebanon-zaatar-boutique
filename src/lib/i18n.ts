@@ -118,7 +118,7 @@ export const translations = {
     },
     trust: {
       secure: 'Sichere Zahlung',
-      secureDesc: 'Verschlüsselte Transaktion',
+      secureDesc: 'Keine Daten gespeichert',
       fast: 'Schnelle Lieferung',
       fastDesc: '2-4 Werktage',
       authentic: 'Aus dem Libanon',
@@ -261,7 +261,7 @@ export const translations = {
     },
     trust: {
       secure: 'Secure Payment',
-      secureDesc: 'Encrypted transaction',
+      secureDesc: 'No data stored',
       fast: 'Fast Delivery',
       fastDesc: '2-4 business days',
       authentic: 'From Lebanon',
@@ -404,7 +404,7 @@ export const translations = {
     },
     trust: {
       secure: 'دفع آمن',
-      secureDesc: 'معاملة مشفرة',
+      secureDesc: 'لا نحفظ بياناتك',
       fast: 'توصيل سريع',
       fastDesc: '2-4 أيام عمل',
       authentic: 'من لبنان',

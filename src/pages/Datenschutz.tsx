@@ -83,12 +83,24 @@ const Datenschutz = () => {
 
             <section>
               <h2 className="font-heading text-2xl font-semibold text-foreground mb-4">
-                {language === 'de' ? '5. Zahlungsabwicklung' : '5. Payment Processing'}
+                {language === 'de' ? '5. Zahlungsabwicklung & Datensicherheit' : '5. Payment Processing & Data Security'}
               </h2>
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 mb-4">
+                <p className="font-semibold text-primary mb-2">
+                  {language === 'de' 
+                    ? '🔒 Ihre Daten sind sicher!' 
+                    : '🔒 Your data is secure!'}
+                </p>
+                <p>
+                  {language === 'de'
+                    ? 'Wir speichern KEINE Zahlungsdaten auf unserer Website. Alle Zahlungsinformationen werden direkt und sicher an Stripe übermittelt und dort verarbeitet.'
+                    : 'We do NOT store any payment data on our website. All payment information is transmitted directly and securely to Stripe for processing.'}
+                </p>
+              </div>
               <p>
                 {language === 'de'
-                  ? 'Für die Zahlungsabwicklung nutzen wir den Dienst Stripe. Bei der Bezahlung werden Ihre Zahlungsdaten direkt an Stripe übermittelt. Stripe ist nach dem PCI-DSS-Standard zertifiziert und unterliegt den europäischen Datenschutzbestimmungen.'
-                  : 'For payment processing, we use the Stripe service. When making a payment, your payment data is transmitted directly to Stripe. Stripe is PCI-DSS certified and subject to European data protection regulations.'
+                  ? 'Für die Zahlungsabwicklung nutzen wir den Dienst Stripe. Bei der Bezahlung werden Ihre Zahlungsdaten direkt an Stripe übermittelt – ohne über unsere Server zu laufen. Stripe ist nach dem PCI-DSS-Standard zertifiziert und unterliegt den europäischen Datenschutzbestimmungen (DSGVO). Nach Abschluss der Bestellung werden Ihre Lieferdaten nur für den Versand verwendet und anschließend gelöscht.'
+                  : 'For payment processing, we use the Stripe service. When making a payment, your payment data is transmitted directly to Stripe – without passing through our servers. Stripe is PCI-DSS certified and subject to European data protection regulations (GDPR). After your order is completed, your delivery information is only used for shipping and then deleted.'
                 }
               </p>
             </section>
