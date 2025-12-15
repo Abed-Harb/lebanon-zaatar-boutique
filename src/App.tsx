@@ -8,6 +8,7 @@ import Impressum from "./pages/Impressum";
 import Datenschutz from "./pages/Datenschutz";
 import OrderSuccess from "./pages/OrderSuccess";
 import Warenkorb from "./pages/Warenkorb";
+import AdminShipping from "./pages/AdminShipping";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/datenschutz" element={<Datenschutz />} />
           <Route path="/order-success" element={<OrderSuccess />} />
           <Route path="/warenkorb" element={<Warenkorb />} />
+          <Route path="/admin/shipping" element={<AdminShipping />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
