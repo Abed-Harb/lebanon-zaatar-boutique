@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { LanguageProvider, useLanguage } from '@/contexts/LanguageContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { Minus, Plus, Loader2, ShoppingCart, ArrowLeft, Truck, Gift, CreditCard, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,7 +10,7 @@ import product from '@/assets/product.jpeg';
 
 const products = [
   { id: '100g', name: "Za'atar 100g", price: 9.99, weight: '100g' },
-  { id: '200g', name: "Za'atar 200g", price: 15.99, weight: '200g' },
+  { id: '200g', name: "Za'atar 200g", price: 18.49, weight: '200g' },
 ];
 
 const FREE_SHIPPING_THRESHOLD = 20;
@@ -285,12 +285,4 @@ const WarenkorbContent = () => {
   );
 };
 
-const Warenkorb = () => {
-  return (
-    <LanguageProvider>
-      <WarenkorbContent />
-    </LanguageProvider>
-  );
-};
-
-export default Warenkorb;
+export default WarenkorbContent;

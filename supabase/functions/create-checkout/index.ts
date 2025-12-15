@@ -9,17 +9,16 @@ const corsHeaders = {
 
 // Price IDs and actual prices for products
 const PRICES = {
-  "100g": { priceId: "price_1SeOsuABEFDT4Lm9U9s3uPAt", unitPrice: 9.99 },
-  "200g": { priceId: "price_1SeOsjABEFDT4Lm9zGecNSZ4", unitPrice: 15.99 },
-  "test": { priceId: "price_1SePfDJZaJZQqwlbRHSaIzaH", unitPrice: 0.50 },
-  "delivery": { priceId: "price_1SeOtDABEFDT4Lm9gSCFaNOk", unitPrice: 1.99 },
+  "100g": { priceId: "price_1ScwCGJZaJZQqwlb2OPUO0pP", unitPrice: 9.99 },
+  "200g": { priceId: "price_1ScwCiJZaJZQqwlb4x9eNC1o", unitPrice: 18.49 },
+  "delivery": { priceId: "price_1ScwD6JZaJZQqwlbMQB1kSn1", unitPrice: 1.99 },
 } as const;
 
 const FREE_SHIPPING_THRESHOLD = 20;
 
 // Input validation schema
 const CheckoutSchema = z.object({
-  productId: z.enum(["100g", "200g", "test"]),
+  productId: z.enum(["100g", "200g"]),
   quantity: z.number().int().min(1).max(100),
   subtotal: z.number().optional(),
 });
@@ -57,11 +56,10 @@ serve(async (req) => {
     // Calculate subtotal server-side (don't trust client)
     const calculatedSubtotal = product.unitPrice * quantity;
     
-    // Check if order qualifies for free shipping
-    const isTestProduct = productId === "test";
-    const isFreeShipping = isTestProduct || calculatedSubtotal >= FREE_SHIPPING_THRESHOLD;
+    // Check if order qualifies for free shipping (€20 threshold)
+    const isFreeShipping = calculatedSubtotal >= FREE_SHIPPING_THRESHOLD;
     
-    console.log("Shipping calculation", { calculatedSubtotal, isFreeShipping, isTestProduct, threshold: FREE_SHIPPING_THRESHOLD });
+    console.log("Shipping calculation", { calculatedSubtotal, isFreeShipping, threshold: FREE_SHIPPING_THRESHOLD });
 
     // Build line items
     const lineItems: { price: string; quantity: number }[] = [
