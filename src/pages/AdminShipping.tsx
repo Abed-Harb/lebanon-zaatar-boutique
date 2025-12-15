@@ -5,11 +5,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Package, Send } from "lucide-react";
+import { Loader2, Package, Send, Lock } from "lucide-react";
 
 const AdminShipping = () => {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminKey, setAdminKey] = useState("");
   const [formData, setFormData] = useState({
     customerEmail: "",
     customerName: "",
@@ -18,6 +20,19 @@ const AdminShipping = () => {
     carrier: "",
     estimatedDelivery: "",
   });
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (adminKey.trim()) {
+      setIsAuthenticated(true);
+    } else {
+      toast({
+        title: "Fehler",
+        description: "Bitte geben Sie das Admin-Passwort ein.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +57,7 @@ const AdminShipping = () => {
           trackingNumber: formData.trackingNumber || undefined,
           carrier: formData.carrier || undefined,
           estimatedDelivery: formData.estimatedDelivery || undefined,
+          adminKey: adminKey,
         },
       });
 
@@ -63,15 +79,64 @@ const AdminShipping = () => {
       });
     } catch (error: any) {
       console.error("Error sending shipping notification:", error);
-      toast({
-        title: "Fehler",
-        description: error.message || "Versandbenachrichtigung konnte nicht gesendet werden.",
-        variant: "destructive",
-      });
+      
+      // Check for unauthorized error
+      if (error.message?.includes("Unauthorized") || error.context?.status === 401) {
+        setIsAuthenticated(false);
+        setAdminKey("");
+        toast({
+          title: "Fehler",
+          description: "Ungültiges Admin-Passwort. Bitte erneut anmelden.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Fehler",
+          description: error.message || "Versandbenachrichtigung konnte nicht gesendet werden.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background p-4 md:p-8 flex items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <Lock className="w-6 h-6 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">Admin-Zugang</CardTitle>
+            <CardDescription>
+              Geben Sie das Admin-Passwort ein, um fortzufahren
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="adminKey">Admin-Passwort</Label>
+                <Input
+                  id="adminKey"
+                  type="password"
+                  placeholder="••••••••"
+                  value={adminKey}
+                  onChange={(e) => setAdminKey(e.target.value)}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full">
+                <Lock className="mr-2 h-4 w-4" />
+                Anmelden
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
