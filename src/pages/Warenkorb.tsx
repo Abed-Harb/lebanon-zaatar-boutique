@@ -1,8 +1,9 @@
-import { useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
-import { Minus, Plus, Loader2, ShoppingCart, ArrowLeft, Truck, Gift, CreditCard, Shield } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { Minus, Plus, Loader2, ShoppingCart, ArrowLeft, Truck, Gift, CreditCard, Shield, Tag, LogIn, User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -19,6 +20,8 @@ const DELIVERY_COST = 1.99;
 const WarenkorbContent = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { user, isLoading: authLoading, signOut } = useAuth();
   const [searchParams] = useSearchParams();
   
   const initialProduct = searchParams.get('product') || '200g';
@@ -77,6 +80,14 @@ const WarenkorbContent = () => {
       });
       setIsSubmitting(false);
     }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    toast({
+      title: "Abgemeldet",
+      description: "Sie wurden erfolgreich abgemeldet.",
+    });
   };
 
   return (
@@ -169,6 +180,59 @@ const WarenkorbContent = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Promo Code Login Prompt */}
+              {!authLoading && !user && (
+                <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 border border-amber-200 dark:border-amber-800">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-800 flex items-center justify-center flex-shrink-0">
+                      <Tag className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-amber-800 dark:text-amber-200 mb-1">
+                        Haben Sie einen Rabattcode?
+                      </p>
+                      <p className="text-sm text-amber-700 dark:text-amber-300 mb-3">
+                        Melden Sie sich an, um Ihren Rabattcode einzulösen. Jeder Code kann nur einmal pro Kunde verwendet werden.
+                      </p>
+                      <Link
+                        to="/anmelden?redirect=/warenkorb"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-600 text-white hover:bg-amber-700 transition-colors text-sm font-medium"
+                      >
+                        <LogIn className="w-4 h-4" />
+                        Anmelden für Rabattcode
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Logged in user info */}
+              {!authLoading && user && (
+                <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 border border-green-200 dark:border-green-800">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-800 flex items-center justify-center">
+                        <User className="w-5 h-5 text-green-600 dark:text-green-400" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-green-800 dark:text-green-200">
+                          Angemeldet als {user.email}
+                        </p>
+                        <p className="text-sm text-green-700 dark:text-green-300">
+                          Sie können Rabattcodes beim Checkout eingeben
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="text-sm text-green-700 dark:text-green-300 hover:underline"
+                    >
+                      Abmelden
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Info Cards */}
               <div className="grid md:grid-cols-2 gap-4">
