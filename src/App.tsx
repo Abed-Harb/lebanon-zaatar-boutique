@@ -13,6 +13,8 @@ import Warenkorb from "./pages/Warenkorb";
 import AdminShipping from "./pages/AdminShipping";
 import Login from "./pages/Login";
 import Registrieren from "./pages/Registrieren";
+import PasswortVergessen from "./pages/PasswortVergessen";
+import PasswortZuruecksetzen from "./pages/PasswortZuruecksetzen";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,8 @@ const App = () => (
             <Route path="/warenkorb" element={<Warenkorb />} />
             <Route path="/anmelden" element={<Login />} />
             <Route path="/registrieren" element={<Registrieren />} />
+            <Route path="/passwort-vergessen" element={<PasswortVergessen />} />
+            <Route path="/passwort-zuruecksetzen" element={<PasswortZuruecksetzen />} />
             <Route path="/admin/shipping" element={<AdminShipping />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
