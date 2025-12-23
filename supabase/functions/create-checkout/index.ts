@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@18.5.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.2";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
@@ -28,6 +29,12 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Create Supabase client for auth
+  const supabaseClient = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+  );
+
   try {
     const rawBody = await req.json();
     
@@ -44,6 +51,18 @@ serve(async (req) => {
     const { productId, quantity } = validationResult.data;
     
     console.log("Creating checkout session", { productId, quantity });
+
+    // Check if user is authenticated
+    let userEmail: string | undefined;
+    const authHeader = req.headers.get("Authorization");
+    if (authHeader) {
+      const token = authHeader.replace("Bearer ", "");
+      const { data: { user } } = await supabaseClient.auth.getUser(token);
+      if (user?.email) {
+        userEmail = user.email;
+        console.log("Authenticated user:", userEmail);
+      }
+    }
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -76,8 +95,20 @@ serve(async (req) => {
       });
     }
 
-    // Create checkout session
+    // Check for existing Stripe customer if user is authenticated
+    let customerId: string | undefined;
+    if (userEmail) {
+      const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
+      if (customers.data.length > 0) {
+        customerId = customers.data[0].id;
+        console.log("Found existing Stripe customer:", customerId);
+      }
+    }
+
+    // Create checkout session with customer email for promo code tracking
     const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      customer_email: customerId ? undefined : userEmail,
       line_items: lineItems,
       mode: "payment",
       success_url: `${req.headers.get("origin")}/order-success?session_id={CHECKOUT_SESSION_ID}`,
@@ -91,7 +122,7 @@ serve(async (req) => {
       allow_promotion_codes: true,
     });
 
-    console.log("Checkout session created", { sessionId: session.id, url: session.url });
+    console.log("Checkout session created", { sessionId: session.id, url: session.url, userEmail: userEmail || "guest" });
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
