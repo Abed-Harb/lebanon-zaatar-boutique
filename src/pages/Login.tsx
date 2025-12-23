@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { z } from 'zod';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Seo } from '@/components/Seo';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Loader2, Mail, Lock, ArrowLeft } from 'lucide-react';
@@ -20,6 +22,22 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const schema = z.object({
+      email: z.string().email('Bitte geben Sie eine gültige E-Mail ein'),
+      password: z.string().min(6, 'Passwort: mindestens 6 Zeichen'),
+    });
+
+    const parsed = schema.safeParse({ email, password });
+    if (!parsed.success) {
+      toast({
+        title: 'Fehler',
+        description: parsed.error.errors[0]?.message ?? 'Bitte prüfen Sie Ihre Eingaben',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -31,19 +49,19 @@ const Login = () => {
       if (error) throw error;
 
       toast({
-        title: "Erfolgreich angemeldet",
-        description: "Willkommen zurück!",
+        title: 'Erfolgreich angemeldet',
+        description: 'Willkommen zurück!',
       });
 
       navigate(redirectTo);
     } catch (error: any) {
-      console.error('Login error:', error);
       toast({
-        title: "Anmeldefehler",
-        description: error.message === "Invalid login credentials" 
-          ? "Ungültige E-Mail oder Passwort" 
-          : error.message,
-        variant: "destructive",
+        title: 'Anmeldefehler',
+        description:
+          error.message === 'Invalid login credentials'
+            ? 'Ungültige E-Mail oder Passwort'
+            : error.message,
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -52,6 +70,12 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <Seo
+        title="Anmelden | Za'atarati"
+        description="Melden Sie sich an, um Rabattcodes bei Za'atarati einzulösen."
+        canonicalPath="/anmelden"
+        noIndex
+      />
       <Header />
       
       <main className="flex-1 pt-24 pb-16 flex items-center justify-center">

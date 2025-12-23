@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { z } from 'zod';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Seo } from '@/components/Seo';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Loader2, Mail, Lock, User, ArrowLeft } from 'lucide-react';
@@ -22,21 +24,25 @@ const Registrieren = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      toast({
-        title: "Fehler",
-        description: "Die Passwörter stimmen nicht überein",
-        variant: "destructive",
-      });
-      return;
-    }
 
-    if (password.length < 6) {
+    const schema = z
+      .object({
+        name: z.string().min(1, 'Bitte geben Sie Ihren Namen ein'),
+        email: z.string().email('Bitte geben Sie eine gültige E-Mail ein'),
+        password: z.string().min(6, 'Passwort: mindestens 6 Zeichen'),
+        confirmPassword: z.string().min(6),
+      })
+      .refine((v) => v.password === v.confirmPassword, {
+        message: 'Die Passwörter stimmen nicht überein',
+        path: ['confirmPassword'],
+      });
+
+    const parsed = schema.safeParse({ name, email, password, confirmPassword });
+    if (!parsed.success) {
       toast({
-        title: "Fehler",
-        description: "Das Passwort muss mindestens 6 Zeichen lang sein",
-        variant: "destructive",
+        title: 'Fehler',
+        description: parsed.error.errors[0]?.message ?? 'Bitte prüfen Sie Ihre Eingaben',
+        variant: 'destructive',
       });
       return;
     }
@@ -44,10 +50,13 @@ const Registrieren = () => {
     setIsLoading(true);
 
     try {
+      const redirectUrl = `${window.location.origin}${redirectTo}`;
+
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             full_name: name,
           },
@@ -57,17 +66,16 @@ const Registrieren = () => {
       if (error) throw error;
 
       toast({
-        title: "Konto erstellt",
+        title: 'Konto erstellt',
         description: "Willkommen bei Za'atarati!",
       });
 
       navigate(redirectTo);
     } catch (error: any) {
-      console.error('Registration error:', error);
       toast({
-        title: "Registrierungsfehler",
+        title: 'Registrierungsfehler',
         description: error.message,
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
@@ -76,6 +84,12 @@ const Registrieren = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <Seo
+        title="Konto erstellen | Za'atarati"
+        description="Registrieren Sie sich, um Rabattcodes bei Za'atarati zu nutzen."
+        canonicalPath="/registrieren"
+        noIndex
+      />
       <Header />
       
       <main className="flex-1 pt-24 pb-16 flex items-center justify-center">

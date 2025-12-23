@@ -37,32 +37,44 @@ serve(async (req) => {
 
   try {
     const rawBody = await req.json();
-    
+
     // Validate input
     const validationResult = CheckoutSchema.safeParse(rawBody);
     if (!validationResult.success) {
       console.error("Validation failed:", validationResult.error.errors);
       return new Response(
-        JSON.stringify({ error: "Invalid input: " + validationResult.error.errors.map(e => e.message).join(", ") }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+        JSON.stringify({
+          error:
+            "Invalid input: " +
+            validationResult.error.errors.map((e) => e.message).join(", "),
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        }
       );
     }
 
     const { productId, quantity } = validationResult.data;
-    
+
     console.log("Creating checkout session", { productId, quantity });
 
-    // Check if user is authenticated
+    // Detect authenticated user (ignore anon key JWT)
     let userEmail: string | undefined;
     const authHeader = req.headers.get("Authorization");
-    if (authHeader) {
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+
+    if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.replace("Bearer ", "");
-      const { data: { user } } = await supabaseClient.auth.getUser(token);
-      if (user?.email) {
-        userEmail = user.email;
-        console.log("Authenticated user:", userEmail);
+      if (token && token !== anonKey) {
+        const { data, error } = await supabaseClient.auth.getUser(token);
+        if (!error && data.user?.email) {
+          userEmail = data.user.email;
+        }
       }
     }
+
+    const isAuthenticated = !!userEmail;
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -74,11 +86,15 @@ serve(async (req) => {
 
     // Calculate subtotal server-side (don't trust client)
     const calculatedSubtotal = product.unitPrice * quantity;
-    
+
     // Check if order qualifies for free shipping (€20 threshold)
     const isFreeShipping = calculatedSubtotal >= FREE_SHIPPING_THRESHOLD;
-    
-    console.log("Shipping calculation", { calculatedSubtotal, isFreeShipping, threshold: FREE_SHIPPING_THRESHOLD });
+
+    console.log("Shipping calculation", {
+      calculatedSubtotal,
+      isFreeShipping,
+      threshold: FREE_SHIPPING_THRESHOLD,
+    });
 
     // Build line items
     const lineItems: { price: string; quantity: number }[] = [
@@ -87,7 +103,7 @@ serve(async (req) => {
         quantity: quantity,
       },
     ];
-    
+
     if (!isFreeShipping) {
       lineItems.push({
         price: deliveryPriceId,
@@ -101,11 +117,13 @@ serve(async (req) => {
       const customers = await stripe.customers.list({ email: userEmail, limit: 1 });
       if (customers.data.length > 0) {
         customerId = customers.data[0].id;
-        console.log("Found existing Stripe customer:", customerId);
       }
     }
 
-    // Create checkout session with customer email for promo code tracking
+    // Promo codes should ONLY be available for authenticated customers
+    const allowPromotionCodes = isAuthenticated;
+
+    // Create checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : userEmail,
@@ -119,10 +137,14 @@ serve(async (req) => {
       phone_number_collection: {
         enabled: true,
       },
-      allow_promotion_codes: true,
+      allow_promotion_codes: allowPromotionCodes,
     });
 
-    console.log("Checkout session created", { sessionId: session.id, url: session.url, userEmail: userEmail || "guest" });
+    console.log("Checkout session created", {
+      sessionId: session.id,
+      allowPromotionCodes,
+      auth: isAuthenticated ? "user" : "guest",
+    });
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
