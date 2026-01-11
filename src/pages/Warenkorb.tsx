@@ -94,11 +94,11 @@ const WarenkorbContent = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
       
-      <main className="flex-1 pt-24 pb-16">
-        <div className="container mx-auto px-4">
+      <main className="flex-1 pt-24 pb-16 overflow-x-hidden">
+        <div className="container mx-auto px-4 max-w-full overflow-hidden">
           {/* Back Link */}
           <Link 
-            to="/#products" 
+            to="/" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -114,10 +114,10 @@ const WarenkorbContent = () => {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-6">
               {/* Product Card */}
-              <div className="bg-card rounded-2xl p-6 shadow-soft">
-                <div className="flex gap-6">
+              <div className="bg-card rounded-2xl p-4 sm:p-6 shadow-soft">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                   {/* Product Image */}
-                  <div className="w-32 h-32 rounded-xl overflow-hidden flex-shrink-0">
+                  <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl overflow-hidden flex-shrink-0 mx-auto sm:mx-0">
                     <img 
                       src={product} 
                       alt={selectedProductData?.name}
@@ -126,21 +126,21 @@ const WarenkorbContent = () => {
                   </div>
                   
                   {/* Product Info */}
-                  <div className="flex-1">
-                    <h3 className="font-heading text-xl font-semibold text-foreground mb-2">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-heading text-lg sm:text-xl font-semibold text-foreground mb-2 text-center sm:text-left">
                       Za'atarati - {selectedProductData?.name}
                     </h3>
-                    <p className="text-muted-foreground mb-4">
+                    <p className="text-muted-foreground mb-4 text-sm sm:text-base text-center sm:text-left">
                       Premium Lebanese Za'atar spice blend
                     </p>
                     
                     {/* Product Selection */}
-                    <div className="flex flex-wrap gap-3 mb-4">
+                    <div className="flex flex-wrap gap-2 sm:gap-3 mb-4 justify-center sm:justify-start">
                       {products.map(p => (
                         <button
                           key={p.id}
                           onClick={() => setSelectedProduct(p.id)}
-                          className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                          className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
                             selectedProduct === p.id
                               ? 'bg-primary text-primary-foreground'
                               : 'bg-secondary text-secondary-foreground hover:bg-primary/20'
@@ -152,7 +152,7 @@ const WarenkorbContent = () => {
                     </div>
 
                     {/* Quantity & Price */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-muted-foreground">Menge:</span>
                         <div className="flex items-center gap-2 bg-secondary rounded-full px-2">
@@ -173,7 +173,7 @@ const WarenkorbContent = () => {
                           </button>
                         </div>
                       </div>
-                      <p className="font-heading text-2xl font-bold text-primary">
+                      <p className="font-heading text-xl sm:text-2xl font-bold text-primary">
                         €{subtotal.toFixed(2).replace('.', ',')}
                       </p>
                     </div>
