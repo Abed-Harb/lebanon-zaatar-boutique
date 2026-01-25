@@ -11,7 +11,7 @@ const corsHeaders = {
 // Price IDs and actual prices for products
 const PRICES = {
   "100g": { priceId: "price_1ScwCGJZaJZQqwlb2OPUO0pP", unitPrice: 9.99 },
-  "200g": { priceId: "price_1ScwCiJZaJZQqwlb4x9eNC1o", unitPrice: 18.49 },
+  "200g": { priceId: "price_1StZhrJZaJZQqwlbIof7v0Sm", unitPrice: 15.99 },
   "delivery": { priceId: "price_1ScwD6JZaJZQqwlbMQB1kSn1", unitPrice: 1.99 },
 } as const;
 
