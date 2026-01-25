@@ -11,7 +11,7 @@ import product from '@/assets/product.jpeg';
 
 const products = [
   { id: '100g', name: "Za'atar 100g", price: 9.99, weight: '100g' },
-  { id: '200g', name: "Za'atar 200g", price: 18.49, weight: '200g' },
+  { id: '200g', name: "Za'atar 200g", price: 15.99, weight: '200g' },
 ];
 
 const FREE_SHIPPING_THRESHOLD = 20;
