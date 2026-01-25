@@ -65,7 +65,9 @@ serve(async (req) => {
     }
 
     const body = await req.text();
-    const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    
+    // Use constructEventAsync for Deno compatibility
+    const event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
 
     console.log("Received Stripe event:", event.type);
 
