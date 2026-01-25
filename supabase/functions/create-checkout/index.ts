@@ -24,9 +24,44 @@ const CheckoutSchema = z.object({
   subtotal: z.number().optional(),
 });
 
+// Simple in-memory rate limiting (per IP)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const RATE_LIMIT = 10; // requests
+const RATE_WINDOW = 60000; // 1 minute in ms
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_WINDOW });
+    return true;
+  }
+  
+  if (record.count >= RATE_LIMIT) {
+    return false;
+  }
+  
+  record.count++;
+  return true;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Rate limiting check
+  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || 
+                   req.headers.get("cf-connecting-ip") || 
+                   "unknown";
+  
+  if (!checkRateLimit(clientIp)) {
+    console.warn("Rate limit exceeded for IP:", clientIp);
+    return new Response(
+      JSON.stringify({ error: "Too many requests. Please try again later." }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 429 }
+    );
   }
 
   // Create Supabase client for auth
