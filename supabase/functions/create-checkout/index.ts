@@ -12,7 +12,8 @@ const corsHeaders = {
 const PRICES = {
   "100g": { priceId: "price_1ScwCGJZaJZQqwlb2OPUO0pP", unitPrice: 9.99 },
   "200g": { priceId: "price_1StZhrJZaJZQqwlbIof7v0Sm", unitPrice: 15.99 },
-  "delivery": { priceId: "price_1ScwD6JZaJZQqwlbMQB1kSn1", unitPrice: 1.99 },
+  "delivery_dach": { priceId: "price_1ScwD6JZaJZQqwlbMQB1kSn1", unitPrice: 1.99 },
+  "delivery_lu": { priceId: "price_1THOMPJZaJZQqwlb9yMQs354", unitPrice: 7.99 },
 } as const;
 
 const FREE_SHIPPING_THRESHOLD = 20;
@@ -117,7 +118,6 @@ serve(async (req) => {
 
     const product = PRICES[productId];
     const priceId = product.priceId;
-    const deliveryPriceId = PRICES.delivery.priceId;
 
     // Calculate subtotal server-side (don't trust client)
     const calculatedSubtotal = product.unitPrice * quantity;
@@ -131,7 +131,7 @@ serve(async (req) => {
       threshold: FREE_SHIPPING_THRESHOLD,
     });
 
-    // Build line items
+    // Build line items (products only, shipping handled via shipping_options)
     const lineItems: { price: string; quantity: number }[] = [
       {
         price: priceId,
@@ -139,10 +139,46 @@ serve(async (req) => {
       },
     ];
 
-    if (!isFreeShipping) {
-      lineItems.push({
-        price: deliveryPriceId,
-        quantity: 1,
+    // Build shipping options
+    const shippingOptions: Stripe.Checkout.SessionCreateParams.ShippingOption[] = [];
+
+    if (isFreeShipping) {
+      // Free shipping for all countries when threshold met
+      shippingOptions.push({
+        shipping_rate_data: {
+          type: "fixed_amount",
+          fixed_amount: { amount: 0, currency: "eur" },
+          display_name: "Kostenloser Versand",
+          delivery_estimate: {
+            minimum: { unit: "business_day", value: 3 },
+            maximum: { unit: "business_day", value: 7 },
+          },
+        },
+      });
+    } else {
+      // DACH shipping
+      shippingOptions.push({
+        shipping_rate_data: {
+          type: "fixed_amount",
+          fixed_amount: { amount: 199, currency: "eur" },
+          display_name: "Versand (DE/AT/CH)",
+          delivery_estimate: {
+            minimum: { unit: "business_day", value: 3 },
+            maximum: { unit: "business_day", value: 7 },
+          },
+        },
+      });
+      // Luxembourg shipping
+      shippingOptions.push({
+        shipping_rate_data: {
+          type: "fixed_amount",
+          fixed_amount: { amount: 799, currency: "eur" },
+          display_name: "Versand (Luxemburg)",
+          delivery_estimate: {
+            minimum: { unit: "business_day", value: 5 },
+            maximum: { unit: "business_day", value: 10 },
+          },
+        },
       });
     }
 
@@ -167,8 +203,9 @@ serve(async (req) => {
       success_url: `${req.headers.get("origin")}/order-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/warenkorb`,
       shipping_address_collection: {
-        allowed_countries: ["DE", "AT", "CH"],
+        allowed_countries: ["DE", "AT", "CH", "LU"],
       },
+      shipping_options: shippingOptions,
       phone_number_collection: {
         enabled: true,
       },
