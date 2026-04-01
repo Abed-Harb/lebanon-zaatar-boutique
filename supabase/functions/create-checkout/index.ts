@@ -12,7 +12,8 @@ const corsHeaders = {
 const PRICES = {
   "100g": { priceId: "price_1ScwCGJZaJZQqwlb2OPUO0pP", unitPrice: 9.99 },
   "200g": { priceId: "price_1StZhrJZaJZQqwlbIof7v0Sm", unitPrice: 15.99 },
-  "delivery": { priceId: "price_1ScwD6JZaJZQqwlbMQB1kSn1", unitPrice: 1.99 },
+  "delivery_dach": { priceId: "price_1ScwD6JZaJZQqwlbMQB1kSn1", unitPrice: 1.99 },
+  "delivery_lu": { priceId: "price_1THOMPJZaJZQqwlb9yMQs354", unitPrice: 7.99 },
 } as const;
 
 const FREE_SHIPPING_THRESHOLD = 20;
