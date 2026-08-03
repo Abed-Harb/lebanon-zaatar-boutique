@@ -105,10 +105,17 @@ const WarenkorbContent = () => {
             Zurück zum Shop
           </Link>
 
-          <h1 className="font-heading text-3xl md:text-4xl font-bold text-primary mb-8">
+          <h1 className="font-heading text-3xl md:text-4xl font-bold text-primary mb-4">
             <ShoppingCart className="inline-block w-8 h-8 mr-3" />
             Warenkorb
           </h1>
+
+          <div className="mb-8 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+            <p className="font-medium text-amber-800 dark:text-amber-200">
+              Alle Produkte sind Vorbestellungen – der Versand erfolgt ab dem 1. Oktober.
+            </p>
+          </div>
+
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
