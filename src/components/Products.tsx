@@ -78,17 +78,24 @@ const Products = ({ selectedProduct, onSelectProduct }: ProductsProps) => {
                 <p className="font-body text-muted-foreground mb-4">
                   {prod.name}
                 </p>
-                <p className="font-heading text-4xl font-bold text-primary mb-6">
+                <p className="font-heading text-4xl font-bold text-primary mb-3">
                   €{prod.price.toFixed(2).replace('.', ',')}
                 </p>
+
+                <div className="mb-6 px-4 py-2 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                  <p className="text-sm font-medium text-amber-800 dark:text-amber-200">
+                    Vorbestellung – Versand ab 1. Oktober
+                  </p>
+                </div>
 
                 <button
                   onClick={() => handleAddToCart(prod.id)}
                   className="w-full py-3 px-6 rounded-full font-body font-medium transition-all duration-300 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center gap-2"
                 >
                   <ShoppingCart className="w-4 h-4" />
-                  {t.products.addToCart}
+                  Jetzt vorbestellen
                 </button>
+
               </div>
             </div>
           ))}
