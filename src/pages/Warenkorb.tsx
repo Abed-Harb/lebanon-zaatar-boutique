@@ -338,7 +338,7 @@ const WarenkorbContent = () => {
                   ) : (
                     <>
                       <CreditCard className="w-5 h-5" />
-                      Zur Kasse
+                      Vorbestellung abschließen
                     </>
                   )}
                 </button>
