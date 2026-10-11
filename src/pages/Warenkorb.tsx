@@ -110,12 +110,6 @@ const WarenkorbContent = () => {
             Warenkorb
           </h1>
 
-          <div className="mb-8 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-            <p className="font-medium text-amber-800 dark:text-amber-200">
-              Alle Produkte sind Vorbestellungen – der Versand erfolgt ab dem 1. Oktober.
-            </p>
-          </div>
-
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Cart Items */}
@@ -248,8 +242,8 @@ const WarenkorbContent = () => {
                     <Truck className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-foreground">Versand ab 1. Oktober</p>
-                    <p className="text-sm text-muted-foreground">Vorbestellung, deutschlandweit</p>
+                    <p className="font-medium text-foreground">{t.products.delivery}</p>
+                    <p className="text-sm text-muted-foreground">DE · AT · CH · LU</p>
                   </div>
                 </div>
 
@@ -338,7 +332,7 @@ const WarenkorbContent = () => {
                   ) : (
                     <>
                       <CreditCard className="w-5 h-5" />
-                      Vorbestellung abschließen
+                      Zur Kasse
                     </>
                   )}
                 </button>
