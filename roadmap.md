@@ -1,0 +1,3 @@
+- [x] Remove pre-order notices and restore normal order buttons.
+- [ ] Verify the Za'atarati browser-tab logo and normal ordering.
+- [ ] Hide the Lovable badge — blocked: an editor role on Pro or higher is required.
